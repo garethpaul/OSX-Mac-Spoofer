@@ -1,0 +1,6 @@
+{
+    Description      = "SpoofMACAddress";
+    Provides         = ("SpoofMACAddress");
+    Requires         = ("Network", "Disks");
+    OrderPreference  = "None";
+}
