@@ -55,7 +55,7 @@ if __name__ == "__main__":
 	if len(sys.argv) == 1:
 		print "Using default MAC adresses for en0 and en1."
 		setMACAddress("en0", WIRED_INTERFACE)
-		setMACAddress("en1", WIRELESS_INTERFACE)
+		#setMACAddress("en1", WIRELESS_INTERFACE)
 
 	elif len(sys.argv) == 3:
 		print "Using manual MAC address."
@@ -65,4 +65,3 @@ if __name__ == "__main__":
 
 	else:
 		print "Wrong number of arguments."
-
