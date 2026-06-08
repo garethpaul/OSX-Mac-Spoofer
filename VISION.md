@@ -35,6 +35,11 @@ Contribution rules:
 
 ## Security And Responsible Use
 
+Canonical security policy and reporting:
+
+- [`SECURITY.md`](SECURITY.md)
+
+
 Changing network identifiers can affect access controls, logs, and network
 policy. This utility should remain an explicit local admin tool and should not
 be packaged for covert or automatic use.
