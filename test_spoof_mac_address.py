@@ -18,16 +18,22 @@ SPEC.loader.exec_module(spoof)
 class SpoofMacAddressTest(unittest.TestCase):
     def test_normalize_mac_address_accepts_compact_and_colon_forms(self):
         self.assertEqual(
-            "01:23:45:67:89:ab",
-            spoof.normalize_mac_address("0123456789AB"),
+            "02:23:45:67:89:ab",
+            spoof.normalize_mac_address("0223456789AB"),
         )
         self.assertEqual(
-            "01:23:45:67:89:ab",
-            spoof.normalize_mac_address("01:23:45:67:89:AB"),
+            "02:23:45:67:89:ab",
+            spoof.normalize_mac_address("02:23:45:67:89:AB"),
         )
 
     def test_normalize_mac_address_rejects_bad_values(self):
-        for value in ["", "01:23:45", "zz:23:45:67:89:ab", "01:23:45:67:89:ab;whoami"]:
+        for value in [
+            "",
+            "01:23:45",
+            "zz:23:45:67:89:ab",
+            "02:23:45:67:89:ab;whoami",
+            "01:23:45:67:89:ab",
+        ]:
             with self.subTest(value=value):
                 with self.assertRaises(ValueError):
                     spoof.normalize_mac_address(value)
@@ -48,11 +54,11 @@ class SpoofMacAddressTest(unittest.TestCase):
     def test_change_commands_are_argument_lists(self):
         commands = spoof.change_commands(
             "en0",
-            "0123456789ab",
+            "0223456789ab",
             airport_interface="en1",
         )
 
-        self.assertIn(["ifconfig", "en0", "ether", "01:23:45:67:89:ab"], commands)
+        self.assertIn(["ifconfig", "en0", "ether", "02:23:45:67:89:ab"], commands)
         for command in commands:
             self.assertIsInstance(command, list)
 
@@ -60,11 +66,11 @@ class SpoofMacAddressTest(unittest.TestCase):
         output = io.StringIO()
         with mock.patch.object(spoof, "get_mac_address") as get_mac_address:
             with redirect_stdout(output):
-                spoof.set_mac_address("en0", "0123456789ab", dry_run=True)
+                spoof.set_mac_address("en0", "0223456789ab", dry_run=True)
 
         get_mac_address.assert_not_called()
         self.assertIn("Dry run", output.getvalue())
-        self.assertIn("ifconfig en0 ether 01:23:45:67:89:ab", output.getvalue())
+        self.assertIn("ifconfig en0 ether 02:23:45:67:89:ab", output.getvalue())
 
     def test_resolve_target_defaults_and_manual_values(self):
         args = argparse.Namespace(
@@ -72,14 +78,20 @@ class SpoofMacAddressTest(unittest.TestCase):
             address=None,
             airport_interface="en1",
         )
-        self.assertEqual(("en0", spoof.DEFAULT_WIRED_ADDRESS, "en1"), spoof.resolve_target(args))
+        output = io.StringIO()
+        with redirect_stdout(output):
+            target = spoof.resolve_target(args)
+        self.assertEqual(("en0", spoof.DEFAULT_WIRED_ADDRESS, "en1"), target)
 
         args = argparse.Namespace(
             interface="en2",
             address="aabbccddeeff",
             airport_interface="en0",
         )
-        self.assertEqual(("en2", "aabbccddeeff", "en0"), spoof.resolve_target(args))
+        output = io.StringIO()
+        with redirect_stdout(output):
+            target = spoof.resolve_target(args)
+        self.assertEqual(("en2", "aabbccddeeff", "en0"), target)
 
 
 if __name__ == "__main__":

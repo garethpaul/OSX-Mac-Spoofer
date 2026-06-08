@@ -71,6 +71,7 @@ def main():
         "validate_interface",
         "subprocess.run(",
         "dry_run",
+        "unicast",
     ]:
         if phrase not in script:
             failures.append(f"SpoofMACAddress.py must mention {phrase}")
@@ -94,6 +95,7 @@ def main():
         "test_normalize_mac_address",
         "test_validate_interface_rejects_shell_metacharacters",
         "test_set_mac_address_dry_run_does_not_read_current_address",
+        "01:23:45:67:89:ab",
     ]:
         if phrase not in tests:
             failures.append(f"tests must include {phrase}")
@@ -115,6 +117,7 @@ def main():
         "SPOOF_MAC_ADDRESS_APPLY=1",
         "explicit local admin tool",
         "MAC address",
+        "unicast",
     ]:
         if phrase.lower() not in docs.lower():
             failures.append(f"docs must mention {phrase}")

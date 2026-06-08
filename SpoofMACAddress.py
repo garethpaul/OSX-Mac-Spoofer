@@ -11,8 +11,8 @@ import argparse
 from typing import Iterable, List, Optional, Sequence, Tuple
 
 
-DEFAULT_WIRELESS_ADDRESS = "01:23:45:67:89:ab"
-DEFAULT_WIRED_ADDRESS = "cd:ef:12:34:56:78"
+DEFAULT_WIRELESS_ADDRESS = "02:23:45:67:89:ab"
+DEFAULT_WIRED_ADDRESS = "02:ef:12:34:56:78"
 
 # Path to Airport binary differs between OS X releases. This is the 10.7 path.
 PATH_TO_AIRPORT = "/System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport"
@@ -34,6 +34,8 @@ def normalize_mac_address(address: str) -> str:
         )
 
     octets = candidate.replace(":", "").lower()
+    if int(octets[:2], 16) & 1:
+        raise ValueError("MAC address must be a unicast address")
     return ":".join(octets[index : index + 2] for index in range(0, 12, 2))
 
 

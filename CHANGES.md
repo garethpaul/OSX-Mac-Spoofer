@@ -10,3 +10,4 @@
   `SPOOF_MAC_ADDRESS_APPLY=1` is set.
 - Added no-network unit tests, `make check`, and static baseline verification.
 - Documented responsible-use boundaries and local admin requirements.
+- Updated default addresses and validation to reject multicast MAC addresses.

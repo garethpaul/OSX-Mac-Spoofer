@@ -69,7 +69,7 @@ sudo python3 SpoofMACAddress.py en0 aa:bb:cc:dd:ee:ff
 
 The script accepts MAC addresses as either 12 hex characters or
 colon-separated octets. Interface names and MAC addresses are validated before
-any command is executed.
+any command is executed, and MAC addresses must be unicast addresses.
 
 The legacy `SpoofMACAddress` startup wrapper runs dry-run mode by default.
 Set `SPOOF_MAC_ADDRESS_APPLY=1` only when startup-time address changes are

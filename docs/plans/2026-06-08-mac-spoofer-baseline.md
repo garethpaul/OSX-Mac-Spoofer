@@ -24,6 +24,8 @@ interface MAC address using `networksetup`, `airport`, and `ifconfig`.
 - Made the startup wrapper run dry-run by default unless
   `SPOOF_MAC_ADDRESS_APPLY=1` is set.
 - Added unit tests for validation, command construction, and dry-run behavior.
+- Replaced legacy multicast default addresses with unicast defaults and reject
+  multicast MAC address input.
 - Added `make check` and `scripts/check-baseline.py` for repeatable local
   verification.
 - Updated README, security, vision, changelog, and ignore rules.
