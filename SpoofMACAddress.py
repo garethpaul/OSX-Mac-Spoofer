@@ -10,10 +10,10 @@ WIRED_INTERFACE = "cdef12345678"
 # This is the 10.7 path.
 PATH_TO_AIRPORT = "/System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport"
 
-def execute(command, shell=False):
-	"""If shell is true, treat command as string and execute as-is."""
+def execute(command):
+	"""Run a command and return its stdout."""
 
-	pipe = Popen(command, stdout=PIPE, shell=shell)
+	pipe = Popen(command, stdout=PIPE)
 	return pipe.communicate()[0]
 
 def getMACAddress(interface, hardware=False):
@@ -24,8 +24,8 @@ def getMACAddress(interface, hardware=False):
 	if hardware:
 		output = execute(["networksetup", "-getmacaddress", interface])
 	else:
-		command = "ifconfig {} | grep ether".format(interface)
-		output = execute(command, shell=True)
+		output = execute(["ifconfig", interface])
+		output = "\n".join(line for line in output.splitlines() if "ether" in line)
 
 	m = re.search("([0-9a-fA-F]{2}:?){6}", output)
 	return m.group(0)
