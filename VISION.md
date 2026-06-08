@@ -39,7 +39,7 @@ Changing network identifiers can affect access controls, logs, and network
 policy. This utility should remain an explicit local admin tool and should not
 be packaged for covert or automatic use.
 
-## What We Will Not Merge For Now
+## What We Will Not Merge (For Now)
 
 - Background daemons that change addresses without consent
 - Network evasion features
