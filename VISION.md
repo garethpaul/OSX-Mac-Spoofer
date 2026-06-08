@@ -13,27 +13,32 @@ interface state.
 The goal is to preserve the script as an explicit administrative tool while
 making platform assumptions, permissions, and responsible-use boundaries clear.
 
+Current baseline: `make check` verifies parser, validation, and dry-run
+behavior without touching the local network.
+
 The current focus is:
 
 Priority:
 
 - Keep interface and address changes visible to the operator
 - Document supported macOS assumptions and required privileges
+- Prefer dry-run behavior before any network change
 - Avoid background or automatic network changes
 - Preserve the ability to pass an interface and address explicitly
 
 Next priorities:
 
-- Add README usage notes and a dry-run mode
-- Update Python 2 syntax if the script is modernized
-- Validate MAC address input before calling system commands
+- Add macOS manual verification notes for current supported versions
 - Document how to restore hardware addresses
+- Consider replacing the legacy `/etc/rc.common` wrapper with a clearly
+  documented modern launchd example if startup behavior is still needed
 
 Contribution rules:
 
 - One PR = one focused validation, platform, command, or documentation change.
 - Do not add persistence without prominent user confirmation.
 - Keep command execution auditable.
+- Keep `make check` passing for parser, validation, and dry-run changes.
 - Include manual verification notes for macOS changes.
 
 ## Security And Responsible Use

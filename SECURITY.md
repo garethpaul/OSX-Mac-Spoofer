@@ -26,12 +26,22 @@ Helpful reports include:
 
 - This repository appears to be a public sample, documentation, or utility project. The active security scope is the code and documentation on the default branch.
 - Review found shell execution, subprocess, or dynamic evaluation surfaces; changes in those areas should receive security-focused review before merge.
+- The active script changes local macOS network interface state through
+  `networksetup`, `airport`, and `ifconfig`. Treat command construction,
+  argument validation, and startup behavior as security-sensitive.
+- The startup wrapper runs dry-run mode unless `SPOOF_MAC_ADDRESS_APPLY=1` is
+  set. Do not add background or persistent address changes without prominent
+  operator consent.
 - No primary dependency manifest was detected in the repository root. If dependencies are added later, include a manifest and prefer reproducible installation instructions.
 
 
 ## Dependency and Supply Chain Security
 
 Dependency updates should come from trusted package managers and should keep lockfiles in sync when lockfiles exist. Do not commit credentials, private keys, tokens, generated secrets, or machine-local configuration. If a vulnerability depends on a compromised package, typosquatting risk, insecure transitive dependency, or unsafe build step, include the package name, affected version, and the path through which it is used.
+
+Do not commit network captures, interface inventories, local machine names, or
+organization-specific MAC addresses. Run `make check` before changing command
+execution, argument validation, or service-wrapper behavior.
 
 ## Safe Research Guidelines
 

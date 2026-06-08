@@ -1,18 +1,28 @@
 #!/bin/sh
 . /etc/rc.common
 
-StartService ()
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+SCRIPT_PATH="${SPOOF_MAC_ADDRESS_SCRIPT:-$SCRIPT_DIR/SpoofMACAddress.py}"
+
+StartService()
 {
     ConsoleMessage "Running SpoofMACAddress script."
-    python (path to python)
+
+    if [ "${SPOOF_MAC_ADDRESS_APPLY:-}" != "1" ]; then
+        ConsoleMessage "SPOOF_MAC_ADDRESS_APPLY is not set to 1; running dry-run."
+        /usr/bin/env python3 "$SCRIPT_PATH" --dry-run
+        return $?
+    fi
+
+    /usr/bin/env python3 "$SCRIPT_PATH"
 }
 
-StopService ()
+StopService()
 {
     return 0
 }
 
-RestartService ()
+RestartService()
 {
     return 0
 }
