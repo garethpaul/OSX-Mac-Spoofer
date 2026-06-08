@@ -45,3 +45,6 @@ be packaged for covert or automatic use.
 - Network evasion features
 - Hidden persistence or launch agents
 - Remote-control behavior
+
+This list is a roadmap guardrail, not a permanent rule.
+Strong user demand and strong technical rationale can change it.
