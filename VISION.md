@@ -1,5 +1,8 @@
 ## OSX Mac Spoofer Vision
 
+This document explains the current state and direction of the project.
+Project overview and developer docs: [`README.md`](README.md)
+
 OSX Mac Spoofer is a legacy Python utility for changing a macOS network
 interface MAC address using system networking commands.
 
