@@ -78,7 +78,7 @@ explicitly intended.
 ## Testing and Verification
 
 - `make check`
-- `python3 -m unittest discover -s tests -p 'test_*.py'`
+- `python3 -m unittest discover -v`
 - `python3 SpoofMACAddress.py --dry-run`
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
