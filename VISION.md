@@ -25,11 +25,14 @@ Priority:
 - Prefer dry-run behavior before any network change
 - Avoid background or automatic network changes
 - Preserve the ability to pass an interface and address explicitly
+- Keep MAC address validation limited to nonzero unicast values
 
 Next priorities:
 
 - Add macOS manual verification notes for current supported versions
 - Document how to restore hardware addresses
+- Document local policy expectations for choosing spoofed nonzero unicast
+  addresses
 - Consider replacing the legacy `/etc/rc.common` wrapper with a clearly
   documented modern launchd example if startup behavior is still needed
 

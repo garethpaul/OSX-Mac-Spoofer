@@ -24,6 +24,7 @@ REQUIRED = [
     "VISION.md",
     "docs/readme-overview.svg",
     PLAN,
+    "docs/plans/2026-06-09-nonzero-mac-validation.md",
     "scripts/check-baseline.py",
     "test_spoof_mac_address.py",
 ]
@@ -72,6 +73,7 @@ def main():
         "subprocess.run(",
         "dry_run",
         "unicast",
+        "all zeroes",
     ]:
         if phrase not in script:
             failures.append(f"SpoofMACAddress.py must mention {phrase}")
@@ -95,6 +97,7 @@ def main():
         "test_normalize_mac_address",
         "test_validate_interface_rejects_shell_metacharacters",
         "test_set_mac_address_dry_run_does_not_read_current_address",
+        "00:00:00:00:00:00",
         "01:23:45:67:89:ab",
     ]:
         if phrase not in tests:
@@ -118,6 +121,7 @@ def main():
         "explicit local admin tool",
         "MAC address",
         "unicast",
+        "nonzero",
     ]:
         if phrase.lower() not in docs.lower():
             failures.append(f"docs must mention {phrase}")
@@ -125,6 +129,9 @@ def main():
     plan = read(PLAN)
     if "status: completed" not in plan or "make check" not in plan:
         failures.append("plan must record completed status and verification")
+    nonzero_plan = read("docs/plans/2026-06-09-nonzero-mac-validation.md")
+    if "status: completed" not in nonzero_plan or "00:00:00:00:00:00" not in nonzero_plan:
+        failures.append("nonzero MAC plan must record completed status and verification")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")
