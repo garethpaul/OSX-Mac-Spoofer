@@ -34,6 +34,8 @@ Helpful reports include:
   operator consent.
 - MAC address inputs should stay constrained to nonzero, locally administered
   unicast values before command construction.
+- Interface names that start with a dash should stay rejected so operator
+  input cannot be interpreted as extra platform-tool options.
 - Observed current or hardware MAC addresses from macOS command output should
   be normalized without requiring the local-admin bit, because hardware
   addresses are commonly globally administered.

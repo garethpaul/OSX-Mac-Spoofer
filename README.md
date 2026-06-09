@@ -71,6 +71,8 @@ The script accepts MAC addresses as either 12 hex characters or
 colon-separated octets. Interface names and MAC addresses are validated before
 any command is executed, and MAC addresses must be nonzero unicast addresses
 that are locally administered.
+Interface names must not start with a dash, so option-like values such as
+`--help` are rejected before they reach macOS networking tools.
 Observed current and hardware addresses from `ifconfig` and `networksetup` are
 normalized separately because real hardware addresses are commonly globally
 administered.

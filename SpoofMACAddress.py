@@ -58,6 +58,8 @@ def validate_interface(interface: str) -> str:
     candidate = interface.strip()
     if not candidate:
         raise ValueError("interface is required")
+    if candidate.startswith("-"):
+        raise ValueError("interface must not start with a dash")
     if not INTERFACE_RE.match(candidate):
         raise ValueError("interface contains unsupported characters")
     return candidate

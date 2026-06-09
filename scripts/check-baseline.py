@@ -27,6 +27,7 @@ REQUIRED = [
     "docs/plans/2026-06-09-nonzero-mac-validation.md",
     "docs/plans/2026-06-09-local-admin-mac-validation.md",
     "docs/plans/2026-06-09-observed-mac-normalization.md",
+    "docs/plans/2026-06-09-interface-option-validation.md",
     "scripts/check-baseline.py",
     "test_spoof_mac_address.py",
 ]
@@ -78,6 +79,7 @@ def main():
         "unicast",
         "all zeroes",
         "locally administered",
+        "interface must not start with a dash",
     ]:
         if phrase not in script:
             failures.append(f"SpoofMACAddress.py must mention {phrase}")
@@ -105,6 +107,7 @@ def main():
         "00:00:00:00:00:00",
         "01:23:45:67:89:ab",
         "00:23:45:67:89:ab",
+        "--help",
     ]:
         if phrase not in tests:
             failures.append(f"tests must include {phrase}")
@@ -130,6 +133,7 @@ def main():
         "nonzero",
         "locally administered",
         "observed",
+        "dash",
     ]:
         if phrase.lower() not in docs.lower():
             failures.append(f"docs must mention {phrase}")
@@ -146,6 +150,9 @@ def main():
     observed_plan = read("docs/plans/2026-06-09-observed-mac-normalization.md")
     if "status: completed" not in observed_plan or "normalize_observed_mac_address" not in observed_plan:
         failures.append("observed MAC plan must record completed status and verification")
+    interface_plan = read("docs/plans/2026-06-09-interface-option-validation.md")
+    if "status: completed" not in interface_plan or "--help" not in interface_plan:
+        failures.append("interface option plan must record completed status and verification")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

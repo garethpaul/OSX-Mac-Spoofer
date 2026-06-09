@@ -27,6 +27,7 @@ Priority:
 - Preserve the ability to pass an interface and address explicitly
 - Keep MAC address validation limited to nonzero, locally administered unicast
   values
+- Reject option-like interface names before command construction
 - Keep observed hardware or current MAC address parsing separate from spoof
   target validation
 

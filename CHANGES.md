@@ -15,3 +15,5 @@
 - Required spoofed MAC addresses to be locally administered unicast addresses.
 - Split observed MAC address normalization from spoof-target validation so
   globally administered hardware addresses can still be reported.
+- Rejected option-like interface names that start with a dash before command
+  construction.

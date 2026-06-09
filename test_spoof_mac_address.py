@@ -48,7 +48,14 @@ class SpoofMacAddressTest(unittest.TestCase):
 
     def test_validate_interface_rejects_shell_metacharacters(self):
         self.assertEqual("en0", spoof.validate_interface(" en0 "))
-        for value in ["", "en0;reboot", "en0 $(id)", "en0/../../tmp"]:
+        for value in [
+            "",
+            "-a",
+            "--help",
+            "en0;reboot",
+            "en0 $(id)",
+            "en0/../../tmp",
+        ]:
             with self.subTest(value=value):
                 with self.assertRaises(ValueError):
                     spoof.validate_interface(value)
