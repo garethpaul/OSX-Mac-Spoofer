@@ -6,6 +6,8 @@
   execution.
 - Added stable Make aliases for lint, build-through-test, and full verification
   gates.
+- Made verification bytecode-free and added a guard against leftover Python
+  bytecode.
 
 ## 2026-06-08
 

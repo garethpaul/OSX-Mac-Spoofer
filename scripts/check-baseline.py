@@ -32,6 +32,7 @@ REQUIRED = [
     "docs/plans/2026-06-09-command-output-type.md",
     "docs/plans/2026-06-09-make-gate-aliases.md",
     "docs/plans/2026-06-09-malformed-command-validation.md",
+    "docs/plans/2026-06-09-bytecode-free-verification.md",
     "scripts/check-baseline.py",
     "test_spoof_mac_address.py",
 ]
@@ -130,9 +131,11 @@ def main():
 
     makefile = read("Makefile")
     for phrase in [
-        "python3 -m unittest discover -v",
+        "PYTHON ?= python3",
+        "PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -v",
+        "compile(pathlib.Path(path).read_text(), path, 'exec')",
         "sh -n SpoofMACAddress",
-        "scripts/check-baseline.py",
+        "PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/check-baseline.py",
         "verify: check",
         "build: test",
         "lint: static-check",
@@ -144,6 +147,13 @@ def main():
     for phrase in ["__pycache__/", ".env", "*.log", "tmp/"]:
         if phrase not in gitignore:
             failures.append(f".gitignore must include {phrase}")
+    bytecode_paths = sorted(
+        str(path.relative_to(ROOT))
+        for pattern in ("__pycache__", "*.pyc")
+        for path in ROOT.rglob(pattern)
+    )
+    if bytecode_paths:
+        failures.append("generated Python bytecode must not remain after gates: " + ", ".join(bytecode_paths[:5]))
 
     docs = "\n".join(read(path) for path in ["README.md", "SECURITY.md", "VISION.md"])
     for phrase in [
@@ -163,6 +173,7 @@ def main():
         "non-string",
         "command output",
         "malformed command sequences",
+        "Python bytecode",
     ]:
         if phrase.lower() not in docs.lower():
             failures.append(f"docs must mention {phrase}")
@@ -195,6 +206,9 @@ def main():
     malformed_command_plan = read("docs/plans/2026-06-09-malformed-command-validation.md")
     if "status: completed" not in malformed_command_plan or "normalize_command" not in malformed_command_plan:
         failures.append("malformed command validation plan must record completed status and verification")
+    bytecode_plan = read("docs/plans/2026-06-09-bytecode-free-verification.md")
+    if "status: completed" not in bytecode_plan or "Python bytecode" not in bytecode_plan:
+        failures.append("bytecode-free verification plan must record completed status and verification")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

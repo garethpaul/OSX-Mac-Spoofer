@@ -99,6 +99,8 @@ explicitly intended.
 `make lint` runs the Python, shell, and static baseline checks; `make build`
 uses the no-network unittest suite as the build-through-test gate; and
 `make verify` delegates to the full `make check` workflow.
+Verification runs with Python bytecode writes disabled and uses a bytecode-free
+syntax compile, so no `__pycache__` output should remain after the gates.
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 
@@ -122,6 +124,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - Non-string command output should fail validation before observed MAC parsing.
 - Malformed command sequences should fail validation before dry-run rendering
   or subprocess execution.
+- Python bytecode is local tooling output and should not remain after
+  verification.
 
 ## Maintenance Notes
 

@@ -1,5 +1,7 @@
 .PHONY: build check lint static-check test verify
 
+PYTHON ?= python3
+
 check: test static-check
 
 verify: check
@@ -9,9 +11,9 @@ build: test
 lint: static-check
 
 test:
-	python3 -m unittest discover -v
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -v
 
 static-check:
-	python3 -m py_compile SpoofMACAddress.py test_spoof_mac_address.py scripts/check-baseline.py
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -c "import pathlib; [compile(pathlib.Path(path).read_text(), path, 'exec') for path in ('SpoofMACAddress.py', 'test_spoof_mac_address.py', 'scripts/check-baseline.py')]"
 	sh -n SpoofMACAddress
-	python3 scripts/check-baseline.py
+	PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/check-baseline.py

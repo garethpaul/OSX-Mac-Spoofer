@@ -36,6 +36,7 @@ Priority:
 - Keep non-string command output out of observed MAC parsing
 - Reject malformed command sequences before dry-run rendering or subprocess
   execution
+- Keep verification targets from leaving Python bytecode behind
 - Keep `make lint`, `make build`, `make verify`, and `make check` available as
   local verification gates
 
@@ -55,6 +56,7 @@ Contribution rules:
 - Keep command execution auditable.
 - Keep `make lint`, `make build`, `make verify`, and `make check` passing for
   parser, validation, and dry-run changes.
+- Preserve bytecode-free verification when changing Makefile gates.
 - Include manual verification notes for macOS changes.
 
 ## Security And Responsible Use
