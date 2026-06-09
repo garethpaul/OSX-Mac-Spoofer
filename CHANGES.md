@@ -13,3 +13,5 @@
 - Updated default addresses and validation to reject multicast MAC addresses.
 - Rejected the all-zero MAC address before command construction.
 - Required spoofed MAC addresses to be locally administered unicast addresses.
+- Split observed MAC address normalization from spoof-target validation so
+  globally administered hardware addresses can still be reported.

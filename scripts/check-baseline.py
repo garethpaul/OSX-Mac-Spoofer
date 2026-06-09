@@ -26,6 +26,7 @@ REQUIRED = [
     PLAN,
     "docs/plans/2026-06-09-nonzero-mac-validation.md",
     "docs/plans/2026-06-09-local-admin-mac-validation.md",
+    "docs/plans/2026-06-09-observed-mac-normalization.md",
     "scripts/check-baseline.py",
     "test_spoof_mac_address.py",
 ]
@@ -70,6 +71,7 @@ def main():
     for phrase in [
         "argparse",
         "normalize_mac_address",
+        "normalize_observed_mac_address",
         "validate_interface",
         "subprocess.run(",
         "dry_run",
@@ -97,6 +99,7 @@ def main():
     tests = read("test_spoof_mac_address.py")
     for phrase in [
         "test_normalize_mac_address",
+        "test_normalize_observed_mac_address_accepts_hardware_addresses",
         "test_validate_interface_rejects_shell_metacharacters",
         "test_set_mac_address_dry_run_does_not_read_current_address",
         "00:00:00:00:00:00",
@@ -126,6 +129,7 @@ def main():
         "unicast",
         "nonzero",
         "locally administered",
+        "observed",
     ]:
         if phrase.lower() not in docs.lower():
             failures.append(f"docs must mention {phrase}")
@@ -139,6 +143,9 @@ def main():
     local_admin_plan = read("docs/plans/2026-06-09-local-admin-mac-validation.md")
     if "status: completed" not in local_admin_plan or "locally administered" not in local_admin_plan:
         failures.append("local-admin MAC plan must record completed status and verification")
+    observed_plan = read("docs/plans/2026-06-09-observed-mac-normalization.md")
+    if "status: completed" not in observed_plan or "normalize_observed_mac_address" not in observed_plan:
+        failures.append("observed MAC plan must record completed status and verification")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

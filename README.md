@@ -71,6 +71,9 @@ The script accepts MAC addresses as either 12 hex characters or
 colon-separated octets. Interface names and MAC addresses are validated before
 any command is executed, and MAC addresses must be nonzero unicast addresses
 that are locally administered.
+Observed current and hardware addresses from `ifconfig` and `networksetup` are
+normalized separately because real hardware addresses are commonly globally
+administered.
 
 The legacy `SpoofMACAddress` startup wrapper runs dry-run mode by default.
 Set `SPOOF_MAC_ADDRESS_APPLY=1` only when startup-time address changes are
@@ -97,6 +100,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   policy enforcement. Keep this tool explicit, local, and operator-controlled.
 - The validator rejects multicast and all-zero MAC address values before command
   construction. Spoofed values must also be locally administered addresses.
+- Observed command output is normalized without requiring the local-admin bit,
+  so hardware address reporting does not block a legitimate local change.
 
 ## Maintenance Notes
 

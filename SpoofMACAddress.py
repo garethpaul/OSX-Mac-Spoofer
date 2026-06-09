@@ -24,8 +24,8 @@ INTERFACE_RE = re.compile(r"^[A-Za-z0-9_.:-]+$")
 MAC_IN_OUTPUT_RE = re.compile(r"\b(?:[0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}\b")
 
 
-def normalize_mac_address(address: str) -> str:
-    """Return a colon-separated lower-case MAC address."""
+def normalize_observed_mac_address(address: str) -> str:
+    """Return a colon-separated lower-case MAC address from command output."""
 
     candidate = address.strip()
     if not MAC_ADDRESS_RE.match(candidate):
@@ -39,9 +39,17 @@ def normalize_mac_address(address: str) -> str:
     first_octet = int(octets[:2], 16)
     if first_octet & 1:
         raise ValueError("MAC address must be a unicast address")
+    return ":".join(octets[index : index + 2] for index in range(0, 12, 2))
+
+
+def normalize_mac_address(address: str) -> str:
+    """Return a validated spoof target MAC address."""
+
+    normalized = normalize_observed_mac_address(address)
+    first_octet = int(normalized[:2], 16)
     if not first_octet & 2:
         raise ValueError("MAC address must be locally administered")
-    return ":".join(octets[index : index + 2] for index in range(0, 12, 2))
+    return normalized
 
 
 def validate_interface(interface: str) -> str:
@@ -61,7 +69,7 @@ def parse_mac_address(output: str) -> str:
     match = MAC_IN_OUTPUT_RE.search(output)
     if not match:
         raise ValueError("no MAC address found in command output")
-    return normalize_mac_address(match.group(0))
+    return normalize_observed_mac_address(match.group(0))
 
 
 def command_text(command: Sequence[str]) -> str:

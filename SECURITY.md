@@ -34,6 +34,9 @@ Helpful reports include:
   operator consent.
 - MAC address inputs should stay constrained to nonzero, locally administered
   unicast values before command construction.
+- Observed current or hardware MAC addresses from macOS command output should
+  be normalized without requiring the local-admin bit, because hardware
+  addresses are commonly globally administered.
 - No primary dependency manifest was detected in the repository root. If dependencies are added later, include a manifest and prefer reproducible installation instructions.
 
 

@@ -26,6 +26,12 @@ class SpoofMacAddressTest(unittest.TestCase):
             spoof.normalize_mac_address("02:23:45:67:89:AB"),
         )
 
+    def test_normalize_observed_mac_address_accepts_hardware_addresses(self):
+        self.assertEqual(
+            "00:23:45:67:89:ab",
+            spoof.normalize_observed_mac_address("00:23:45:67:89:AB"),
+        )
+
     def test_normalize_mac_address_rejects_bad_values(self):
         for value in [
             "",
@@ -49,8 +55,8 @@ class SpoofMacAddressTest(unittest.TestCase):
 
     def test_parse_mac_address_extracts_and_normalizes(self):
         self.assertEqual(
-            "aa:bb:cc:dd:ee:ff",
-            spoof.parse_mac_address("ether AA:BB:CC:DD:EE:FF"),
+            "00:bb:cc:dd:ee:ff",
+            spoof.parse_mac_address("ether 00:BB:CC:DD:EE:FF"),
         )
 
     def test_change_commands_are_argument_lists(self):
