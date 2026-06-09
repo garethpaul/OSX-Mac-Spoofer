@@ -30,6 +30,7 @@ REQUIRED = [
     "docs/plans/2026-06-09-interface-option-validation.md",
     "docs/plans/2026-06-09-non-string-validator-inputs.md",
     "docs/plans/2026-06-09-command-output-type.md",
+    "docs/plans/2026-06-09-make-gate-aliases.md",
     "scripts/check-baseline.py",
     "test_spoof_mac_address.py",
 ]
@@ -121,7 +122,14 @@ def main():
             failures.append(f"tests must include {phrase}")
 
     makefile = read("Makefile")
-    for phrase in ["python3 -m unittest discover -v", "sh -n SpoofMACAddress", "scripts/check-baseline.py"]:
+    for phrase in [
+        "python3 -m unittest discover -v",
+        "sh -n SpoofMACAddress",
+        "scripts/check-baseline.py",
+        "verify: check",
+        "build: test",
+        "lint: static-check",
+    ]:
         if phrase not in makefile:
             failures.append(f"Makefile must include {phrase}")
 
@@ -133,6 +141,9 @@ def main():
     docs = "\n".join(read(path) for path in ["README.md", "SECURITY.md", "VISION.md"])
     for phrase in [
         "make check",
+        "make lint",
+        "make build",
+        "make verify",
         "--dry-run",
         "SPOOF_MAC_ADDRESS_APPLY=1",
         "explicit local admin tool",
@@ -169,6 +180,10 @@ def main():
     output_plan = read("docs/plans/2026-06-09-command-output-type.md")
     if "status: completed" not in output_plan or "command output" not in output_plan:
         failures.append("command output type plan must record completed status and verification")
+    make_gates_plan = read("docs/plans/2026-06-09-make-gate-aliases.md")
+    for phrase in ["status: completed", "make lint", "make build", "make verify"]:
+        if phrase not in make_gates_plan:
+            failures.append(f"make gate alias plan must record {phrase}")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

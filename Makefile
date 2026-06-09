@@ -1,6 +1,12 @@
-.PHONY: check test static-check
+.PHONY: build check lint static-check test verify
 
 check: test static-check
+
+verify: check
+
+build: test
+
+lint: static-check
 
 test:
 	python3 -m unittest discover -v

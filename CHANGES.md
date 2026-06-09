@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-09
+
+- Added stable Make aliases for lint, build-through-test, and full verification
+  gates.
+
 ## 2026-06-08
 
 - Ported `SpoofMACAddress.py` to Python 3 with argument parsing, MAC address

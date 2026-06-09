@@ -14,7 +14,9 @@ The goal is to preserve the script as an explicit administrative tool while
 making platform assumptions, permissions, and responsible-use boundaries clear.
 
 Current baseline: `make check` verifies parser, validation, and dry-run
-behavior without touching the local network.
+behavior without touching the local network. `make lint`, `make build`, and
+`make verify` provide stable aliases for static checks, build-through-test, and
+full verification.
 
 The current focus is:
 
@@ -32,6 +34,8 @@ Priority:
   target validation
 - Keep non-string validator inputs out of command construction
 - Keep non-string command output out of observed MAC parsing
+- Keep `make lint`, `make build`, `make verify`, and `make check` available as
+  local verification gates
 
 Next priorities:
 
@@ -47,7 +51,8 @@ Contribution rules:
 - One PR = one focused validation, platform, command, or documentation change.
 - Do not add persistence without prominent user confirmation.
 - Keep command execution auditable.
-- Keep `make check` passing for parser, validation, and dry-run changes.
+- Keep `make lint`, `make build`, `make verify`, and `make check` passing for
+  parser, validation, and dry-run changes.
 - Include manual verification notes for macOS changes.
 
 ## Security And Responsible Use

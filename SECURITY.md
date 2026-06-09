@@ -50,8 +50,9 @@ Helpful reports include:
 Dependency updates should come from trusted package managers and should keep lockfiles in sync when lockfiles exist. Do not commit credentials, private keys, tokens, generated secrets, or machine-local configuration. If a vulnerability depends on a compromised package, typosquatting risk, insecure transitive dependency, or unsafe build step, include the package name, affected version, and the path through which it is used.
 
 Do not commit network captures, interface inventories, local machine names, or
-organization-specific MAC addresses. Run `make check` before changing command
-execution, argument validation, or service-wrapper behavior.
+organization-specific MAC addresses. Run `make lint`, `make build`,
+`make verify`, and `make check` before changing command execution, argument
+validation, or service-wrapper behavior.
 
 ## Safe Research Guidelines
 

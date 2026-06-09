@@ -47,6 +47,7 @@ Additional scan context:
 ```bash
 git clone https://github.com/garethpaul/OSX-Mac-Spoofer.git
 cd OSX-Mac-Spoofer
+make check
 ```
 
 The setup commands above are derived from repository files. Legacy mobile, Python, or JavaScript samples may require older SDKs or package versions than a modern workstation uses by default.
@@ -87,8 +88,15 @@ explicitly intended.
 ## Testing and Verification
 
 - `make check`
+- `make lint`
+- `make build`
+- `make verify`
 - `python3 -m unittest discover -v`
 - `python3 SpoofMACAddress.py --dry-run`
+
+`make lint` runs the Python, shell, and static baseline checks; `make build`
+uses the no-network unittest suite as the build-through-test gate; and
+`make verify` delegates to the full `make check` workflow.
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 
@@ -116,6 +124,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `CHANGES.md` and `docs/plans/2026-06-08-mac-spoofer-baseline.md` for
   the current modernization baseline.
+- See `docs/plans/2026-06-09-make-gate-aliases.md` for the local Make gate
+  aliases.
 - See `VISION.md` for project direction and contribution guardrails.
 
 ## Contributing
