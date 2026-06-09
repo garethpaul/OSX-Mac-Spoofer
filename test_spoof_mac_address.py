@@ -78,6 +78,12 @@ class SpoofMacAddressTest(unittest.TestCase):
             spoof.parse_mac_address("ether 00:BB:CC:DD:EE:FF"),
         )
 
+    def test_parse_mac_address_rejects_non_string_output(self):
+        for value in [None, 123, b"ether 00:BB:CC:DD:EE:FF"]:
+            with self.subTest(value=value):
+                with self.assertRaises(ValueError):
+                    spoof.parse_mac_address(value)
+
     def test_change_commands_are_argument_lists(self):
         commands = spoof.change_commands(
             "en0",

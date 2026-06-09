@@ -75,6 +75,7 @@ Interface names must not start with a dash, so option-like values such as
 `--help` are rejected before they reach macOS networking tools.
 Non-string MAC address and interface inputs are rejected before normalization
 or command construction.
+Non-string command output is rejected before observed MAC address parsing.
 Observed current and hardware addresses from `ifconfig` and `networksetup` are
 normalized separately because real hardware addresses are commonly globally
 administered.
@@ -108,6 +109,7 @@ When the required SDK or runtime is unavailable, use static checks and source re
   so hardware address reporting does not block a legitimate local change.
 - Non-string MAC address and interface values should fail validation before any
   command arguments are built.
+- Non-string command output should fail validation before observed MAC parsing.
 
 ## Maintenance Notes
 

@@ -29,6 +29,7 @@ REQUIRED = [
     "docs/plans/2026-06-09-observed-mac-normalization.md",
     "docs/plans/2026-06-09-interface-option-validation.md",
     "docs/plans/2026-06-09-non-string-validator-inputs.md",
+    "docs/plans/2026-06-09-command-output-type.md",
     "scripts/check-baseline.py",
     "test_spoof_mac_address.py",
 ]
@@ -83,6 +84,7 @@ def main():
         "interface must not start with a dash",
         "isinstance(address, str)",
         "isinstance(interface, str)",
+        "isinstance(output, str)",
     ]:
         if phrase not in script:
             failures.append(f"SpoofMACAddress.py must mention {phrase}")
@@ -113,6 +115,7 @@ def main():
         "--help",
         "test_normalize_mac_address_rejects_non_string_values",
         "test_validate_interface_rejects_non_string_values",
+        "test_parse_mac_address_rejects_non_string_output",
     ]:
         if phrase not in tests:
             failures.append(f"tests must include {phrase}")
@@ -140,6 +143,7 @@ def main():
         "observed",
         "dash",
         "non-string",
+        "command output",
     ]:
         if phrase.lower() not in docs.lower():
             failures.append(f"docs must mention {phrase}")
@@ -162,6 +166,9 @@ def main():
     non_string_plan = read("docs/plans/2026-06-09-non-string-validator-inputs.md")
     if "status: completed" not in non_string_plan or "non-string" not in non_string_plan:
         failures.append("non-string validator input plan must record completed status and verification")
+    output_plan = read("docs/plans/2026-06-09-command-output-type.md")
+    if "status: completed" not in output_plan or "command output" not in output_plan:
+        failures.append("command output type plan must record completed status and verification")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

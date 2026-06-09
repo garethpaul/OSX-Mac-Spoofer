@@ -41,6 +41,7 @@ Helpful reports include:
   addresses are commonly globally administered.
 - Non-string MAC address and interface values should fail validation before any
   command arguments are built.
+- Non-string command output should fail validation before observed MAC parsing.
 - No primary dependency manifest was detected in the repository root. If dependencies are added later, include a manifest and prefer reproducible installation instructions.
 
 

@@ -72,6 +72,8 @@ def validate_interface(interface: str) -> str:
 def parse_mac_address(output: str) -> str:
     """Extract the first colon-separated MAC address from command output."""
 
+    if not isinstance(output, str):
+        raise ValueError("command output must be text")
     match = MAC_IN_OUTPUT_RE.search(output)
     if not match:
         raise ValueError("no MAC address found in command output")

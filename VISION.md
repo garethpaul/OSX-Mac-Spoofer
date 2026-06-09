@@ -31,6 +31,7 @@ Priority:
 - Keep observed hardware or current MAC address parsing separate from spoof
   target validation
 - Keep non-string validator inputs out of command construction
+- Keep non-string command output out of observed MAC parsing
 
 Next priorities:
 

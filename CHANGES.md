@@ -19,3 +19,4 @@
   construction.
 - Rejected non-string MAC address and interface values before normalization or
   command construction.
+- Rejected non-string command output before observed MAC address parsing.
