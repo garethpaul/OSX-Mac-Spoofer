@@ -46,6 +46,12 @@ class SpoofMacAddressTest(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     spoof.normalize_mac_address(value)
 
+    def test_normalize_mac_address_rejects_non_string_values(self):
+        for value in [None, 123, b"0223456789ab"]:
+            with self.subTest(value=value):
+                with self.assertRaises(ValueError):
+                    spoof.normalize_mac_address(value)
+
     def test_validate_interface_rejects_shell_metacharacters(self):
         self.assertEqual("en0", spoof.validate_interface(" en0 "))
         for value in [
@@ -56,6 +62,12 @@ class SpoofMacAddressTest(unittest.TestCase):
             "en0 $(id)",
             "en0/../../tmp",
         ]:
+            with self.subTest(value=value):
+                with self.assertRaises(ValueError):
+                    spoof.validate_interface(value)
+
+    def test_validate_interface_rejects_non_string_values(self):
+        for value in [None, 123, b"en0"]:
             with self.subTest(value=value):
                 with self.assertRaises(ValueError):
                     spoof.validate_interface(value)

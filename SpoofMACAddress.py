@@ -27,6 +27,8 @@ MAC_IN_OUTPUT_RE = re.compile(r"\b(?:[0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}\b")
 def normalize_observed_mac_address(address: str) -> str:
     """Return a colon-separated lower-case MAC address from command output."""
 
+    if not isinstance(address, str):
+        raise ValueError("MAC address must be text")
     candidate = address.strip()
     if not MAC_ADDRESS_RE.match(candidate):
         raise ValueError(
@@ -55,6 +57,8 @@ def normalize_mac_address(address: str) -> str:
 def validate_interface(interface: str) -> str:
     """Validate an interface name before passing it to system commands."""
 
+    if not isinstance(interface, str):
+        raise ValueError("interface must be text")
     candidate = interface.strip()
     if not candidate:
         raise ValueError("interface is required")

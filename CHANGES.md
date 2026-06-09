@@ -17,3 +17,5 @@
   globally administered hardware addresses can still be reported.
 - Rejected option-like interface names that start with a dash before command
   construction.
+- Rejected non-string MAC address and interface values before normalization or
+  command construction.

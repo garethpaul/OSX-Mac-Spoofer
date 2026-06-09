@@ -30,6 +30,7 @@ Priority:
 - Reject option-like interface names before command construction
 - Keep observed hardware or current MAC address parsing separate from spoof
   target validation
+- Keep non-string validator inputs out of command construction
 
 Next priorities:
 

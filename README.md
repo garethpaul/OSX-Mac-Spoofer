@@ -73,6 +73,8 @@ any command is executed, and MAC addresses must be nonzero unicast addresses
 that are locally administered.
 Interface names must not start with a dash, so option-like values such as
 `--help` are rejected before they reach macOS networking tools.
+Non-string MAC address and interface inputs are rejected before normalization
+or command construction.
 Observed current and hardware addresses from `ifconfig` and `networksetup` are
 normalized separately because real hardware addresses are commonly globally
 administered.
@@ -104,6 +106,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   construction. Spoofed values must also be locally administered addresses.
 - Observed command output is normalized without requiring the local-admin bit,
   so hardware address reporting does not block a legitimate local change.
+- Non-string MAC address and interface values should fail validation before any
+  command arguments are built.
 
 ## Maintenance Notes
 
