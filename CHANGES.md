@@ -12,3 +12,4 @@
 - Documented responsible-use boundaries and local admin requirements.
 - Updated default addresses and validation to reject multicast MAC addresses.
 - Rejected the all-zero MAC address before command construction.
+- Required spoofed MAC addresses to be locally administered unicast addresses.

@@ -25,6 +25,7 @@ REQUIRED = [
     "docs/readme-overview.svg",
     PLAN,
     "docs/plans/2026-06-09-nonzero-mac-validation.md",
+    "docs/plans/2026-06-09-local-admin-mac-validation.md",
     "scripts/check-baseline.py",
     "test_spoof_mac_address.py",
 ]
@@ -74,6 +75,7 @@ def main():
         "dry_run",
         "unicast",
         "all zeroes",
+        "locally administered",
     ]:
         if phrase not in script:
             failures.append(f"SpoofMACAddress.py must mention {phrase}")
@@ -99,6 +101,7 @@ def main():
         "test_set_mac_address_dry_run_does_not_read_current_address",
         "00:00:00:00:00:00",
         "01:23:45:67:89:ab",
+        "00:23:45:67:89:ab",
     ]:
         if phrase not in tests:
             failures.append(f"tests must include {phrase}")
@@ -122,6 +125,7 @@ def main():
         "MAC address",
         "unicast",
         "nonzero",
+        "locally administered",
     ]:
         if phrase.lower() not in docs.lower():
             failures.append(f"docs must mention {phrase}")
@@ -132,6 +136,9 @@ def main():
     nonzero_plan = read("docs/plans/2026-06-09-nonzero-mac-validation.md")
     if "status: completed" not in nonzero_plan or "00:00:00:00:00:00" not in nonzero_plan:
         failures.append("nonzero MAC plan must record completed status and verification")
+    local_admin_plan = read("docs/plans/2026-06-09-local-admin-mac-validation.md")
+    if "status: completed" not in local_admin_plan or "locally administered" not in local_admin_plan:
+        failures.append("local-admin MAC plan must record completed status and verification")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

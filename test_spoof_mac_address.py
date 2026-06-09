@@ -34,6 +34,7 @@ class SpoofMacAddressTest(unittest.TestCase):
             "02:23:45:67:89:ab;whoami",
             "00:00:00:00:00:00",
             "01:23:45:67:89:ab",
+            "00:23:45:67:89:ab",
         ]:
             with self.subTest(value=value):
                 with self.assertRaises(ValueError):

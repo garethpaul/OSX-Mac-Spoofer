@@ -32,8 +32,8 @@ Helpful reports include:
 - The startup wrapper runs dry-run mode unless `SPOOF_MAC_ADDRESS_APPLY=1` is
   set. Do not add background or persistent address changes without prominent
   operator consent.
-- MAC address inputs should stay constrained to nonzero unicast values before
-  command construction.
+- MAC address inputs should stay constrained to nonzero, locally administered
+  unicast values before command construction.
 - No primary dependency manifest was detected in the repository root. If dependencies are added later, include a manifest and prefer reproducible installation instructions.
 
 

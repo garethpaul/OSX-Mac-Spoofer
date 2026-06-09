@@ -25,7 +25,8 @@ Priority:
 - Prefer dry-run behavior before any network change
 - Avoid background or automatic network changes
 - Preserve the ability to pass an interface and address explicitly
-- Keep MAC address validation limited to nonzero unicast values
+- Keep MAC address validation limited to nonzero, locally administered unicast
+  values
 
 Next priorities:
 

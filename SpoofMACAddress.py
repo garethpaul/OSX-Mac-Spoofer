@@ -36,8 +36,11 @@ def normalize_mac_address(address: str) -> str:
     octets = candidate.replace(":", "").lower()
     if int(octets, 16) == 0:
         raise ValueError("MAC address must not be all zeroes")
-    if int(octets[:2], 16) & 1:
+    first_octet = int(octets[:2], 16)
+    if first_octet & 1:
         raise ValueError("MAC address must be a unicast address")
+    if not first_octet & 2:
+        raise ValueError("MAC address must be locally administered")
     return ":".join(octets[index : index + 2] for index in range(0, 12, 2))
 
 
