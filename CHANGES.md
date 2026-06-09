@@ -2,6 +2,8 @@
 
 ## 2026-06-09
 
+- Rejected malformed command sequences before dry-run rendering or subprocess
+  execution.
 - Added stable Make aliases for lint, build-through-test, and full verification
   gates.
 

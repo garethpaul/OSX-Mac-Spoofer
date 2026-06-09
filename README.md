@@ -77,6 +77,8 @@ Interface names must not start with a dash, so option-like values such as
 Non-string MAC address and interface inputs are rejected before normalization
 or command construction.
 Non-string command output is rejected before observed MAC address parsing.
+Malformed command sequences are rejected before dry-run rendering or subprocess
+execution.
 Observed current and hardware addresses from `ifconfig` and `networksetup` are
 normalized separately because real hardware addresses are commonly globally
 administered.
@@ -118,6 +120,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 - Non-string MAC address and interface values should fail validation before any
   command arguments are built.
 - Non-string command output should fail validation before observed MAC parsing.
+- Malformed command sequences should fail validation before dry-run rendering
+  or subprocess execution.
 
 ## Maintenance Notes
 

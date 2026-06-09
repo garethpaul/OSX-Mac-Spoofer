@@ -84,6 +84,19 @@ class SpoofMacAddressTest(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     spoof.parse_mac_address(value)
 
+    def test_execute_rejects_malformed_commands(self):
+        for command in [
+            [],
+            (),
+            "ifconfig en0",
+            b"ifconfig en0",
+            [""],
+            ["ifconfig", None],
+        ]:
+            with self.subTest(command=command):
+                with self.assertRaises(ValueError):
+                    spoof.execute(command, dry_run=True)
+
     def test_change_commands_are_argument_lists(self):
         commands = spoof.change_commands(
             "en0",

@@ -42,6 +42,8 @@ Helpful reports include:
 - Non-string MAC address and interface values should fail validation before any
   command arguments are built.
 - Non-string command output should fail validation before observed MAC parsing.
+- Malformed command sequences should fail validation before dry-run rendering
+  or subprocess execution.
 - No primary dependency manifest was detected in the repository root. If dependencies are added later, include a manifest and prefer reproducible installation instructions.
 
 

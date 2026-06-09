@@ -34,6 +34,8 @@ Priority:
   target validation
 - Keep non-string validator inputs out of command construction
 - Keep non-string command output out of observed MAC parsing
+- Reject malformed command sequences before dry-run rendering or subprocess
+  execution
 - Keep `make lint`, `make build`, `make verify`, and `make check` available as
   local verification gates
 

@@ -80,19 +80,37 @@ def parse_mac_address(output: str) -> str:
     return normalize_observed_mac_address(match.group(0))
 
 
+def normalize_command(command: Sequence[str]) -> List[str]:
+    """Return a validated subprocess argument list."""
+
+    if isinstance(command, (str, bytes)):
+        raise ValueError("command must be a sequence of text arguments")
+    try:
+        checked_command = list(command)
+    except TypeError as error:
+        raise ValueError("command must be a sequence of text arguments") from error
+    if not checked_command:
+        raise ValueError("command is required")
+    for argument in checked_command:
+        if not isinstance(argument, str) or not argument:
+            raise ValueError("command arguments must be non-empty text")
+    return checked_command
+
+
 def command_text(command: Sequence[str]) -> str:
-    return shlex.join(command)
+    return shlex.join(normalize_command(command))
 
 
 def execute(command: Sequence[str], *, dry_run: bool = False) -> str:
     """Run a command and return stdout, or print it when dry-running."""
 
+    checked_command = normalize_command(command)
     if dry_run:
-        print(f"+ {command_text(command)}")
+        print(f"+ {command_text(checked_command)}")
         return ""
 
     result = subprocess.run(
-        list(command),
+        checked_command,
         check=False,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -100,7 +118,7 @@ def execute(command: Sequence[str], *, dry_run: bool = False) -> str:
     )
     if result.returncode != 0:
         detail = result.stderr.strip() or result.stdout.strip() or "no output"
-        raise RuntimeError(f"{command[0]} failed: {detail}")
+        raise RuntimeError(f"{checked_command[0]} failed: {detail}")
     return result.stdout
 
 

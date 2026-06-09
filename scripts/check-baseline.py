@@ -31,6 +31,7 @@ REQUIRED = [
     "docs/plans/2026-06-09-non-string-validator-inputs.md",
     "docs/plans/2026-06-09-command-output-type.md",
     "docs/plans/2026-06-09-make-gate-aliases.md",
+    "docs/plans/2026-06-09-malformed-command-validation.md",
     "scripts/check-baseline.py",
     "test_spoof_mac_address.py",
 ]
@@ -86,6 +87,10 @@ def main():
         "isinstance(address, str)",
         "isinstance(interface, str)",
         "isinstance(output, str)",
+        "normalize_command",
+        "command must be a sequence of text arguments",
+        "command is required",
+        "command arguments must be non-empty text",
     ]:
         if phrase not in script:
             failures.append(f"SpoofMACAddress.py must mention {phrase}")
@@ -117,6 +122,8 @@ def main():
         "test_normalize_mac_address_rejects_non_string_values",
         "test_validate_interface_rejects_non_string_values",
         "test_parse_mac_address_rejects_non_string_output",
+        "test_execute_rejects_malformed_commands",
+        "ifconfig en0",
     ]:
         if phrase not in tests:
             failures.append(f"tests must include {phrase}")
@@ -155,6 +162,7 @@ def main():
         "dash",
         "non-string",
         "command output",
+        "malformed command sequences",
     ]:
         if phrase.lower() not in docs.lower():
             failures.append(f"docs must mention {phrase}")
@@ -184,6 +192,9 @@ def main():
     for phrase in ["status: completed", "make lint", "make build", "make verify"]:
         if phrase not in make_gates_plan:
             failures.append(f"make gate alias plan must record {phrase}")
+    malformed_command_plan = read("docs/plans/2026-06-09-malformed-command-validation.md")
+    if "status: completed" not in malformed_command_plan or "normalize_command" not in malformed_command_plan:
+        failures.append("malformed command validation plan must record completed status and verification")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")
