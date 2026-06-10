@@ -11,6 +11,8 @@
 
 ## 2026-06-10
 
+- Added pinned, read-only hosted Linux validation on Python 3.10 and 3.12 for
+  the mocked, non-privileged command baseline.
 - Rejected whitespace-only command arguments before dry-run rendering or
   subprocess execution.
 

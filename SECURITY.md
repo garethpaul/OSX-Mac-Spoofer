@@ -48,6 +48,8 @@ Helpful reports include:
   rendering or subprocess execution.
 - Python bytecode is local tooling output and should not remain after
   verification gates.
+- Pinned, read-only hosted Linux validation runs only mocked command tests and
+  shell syntax checks; it must never invoke privileged network changes.
 - No primary dependency manifest was detected in the repository root. If dependencies are added later, include a manifest and prefer reproducible installation instructions.
 
 
