@@ -36,6 +36,8 @@ Priority:
 - Keep non-string command output out of observed MAC parsing
 - Reject malformed command sequences before dry-run rendering or subprocess
   execution
+- Reject whitespace-only command arguments before dry-run rendering or
+  subprocess execution
 - Keep verification targets from leaving Python bytecode behind
 - Keep `make lint`, `make build`, `make verify`, and `make check` available as
   local verification gates
@@ -43,6 +45,7 @@ Priority:
 Next priorities:
 
 - Add macOS manual verification notes for current supported versions
+- Add more command argument validation fixtures for malformed direct calls
 - Document how to restore hardware addresses
 - Document local policy expectations for choosing spoofed nonzero unicast
   addresses

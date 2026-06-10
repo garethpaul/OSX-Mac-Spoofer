@@ -33,6 +33,7 @@ REQUIRED = [
     "docs/plans/2026-06-09-make-gate-aliases.md",
     "docs/plans/2026-06-09-malformed-command-validation.md",
     "docs/plans/2026-06-09-bytecode-free-verification.md",
+    "docs/plans/2026-06-10-whitespace-command-arguments.md",
     "scripts/check-baseline.py",
     "test_spoof_mac_address.py",
 ]
@@ -92,6 +93,7 @@ def main():
         "command must be a sequence of text arguments",
         "command is required",
         "command arguments must be non-empty text",
+        "argument.strip()",
     ]:
         if phrase not in script:
             failures.append(f"SpoofMACAddress.py must mention {phrase}")
@@ -125,6 +127,7 @@ def main():
         "test_parse_mac_address_rejects_non_string_output",
         "test_execute_rejects_malformed_commands",
         "ifconfig en0",
+        '["ifconfig", " "]',
     ]:
         if phrase not in tests:
             failures.append(f"tests must include {phrase}")
@@ -173,6 +176,7 @@ def main():
         "non-string",
         "command output",
         "malformed command sequences",
+        "whitespace-only command arguments",
         "Python bytecode",
     ]:
         if phrase.lower() not in docs.lower():
@@ -209,6 +213,12 @@ def main():
     bytecode_plan = read("docs/plans/2026-06-09-bytecode-free-verification.md")
     if "status: completed" not in bytecode_plan or "Python bytecode" not in bytecode_plan:
         failures.append("bytecode-free verification plan must record completed status and verification")
+    whitespace_command_plan = read("docs/plans/2026-06-10-whitespace-command-arguments.md")
+    if (
+        "status: completed" not in whitespace_command_plan
+        or "whitespace-only command arguments" not in whitespace_command_plan
+    ):
+        failures.append("whitespace command argument plan must record completed status and verification")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

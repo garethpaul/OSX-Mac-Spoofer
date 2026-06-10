@@ -9,6 +9,11 @@
 - Made verification bytecode-free and added a guard against leftover Python
   bytecode.
 
+## 2026-06-10
+
+- Rejected whitespace-only command arguments before dry-run rendering or
+  subprocess execution.
+
 ## 2026-06-08
 
 - Ported `SpoofMACAddress.py` to Python 3 with argument parsing, MAC address

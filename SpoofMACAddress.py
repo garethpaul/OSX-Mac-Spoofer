@@ -92,7 +92,7 @@ def normalize_command(command: Sequence[str]) -> List[str]:
     if not checked_command:
         raise ValueError("command is required")
     for argument in checked_command:
-        if not isinstance(argument, str) or not argument:
+        if not isinstance(argument, str) or not argument.strip():
             raise ValueError("command arguments must be non-empty text")
     return checked_command
 

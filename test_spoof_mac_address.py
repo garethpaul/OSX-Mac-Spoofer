@@ -91,6 +91,7 @@ class SpoofMacAddressTest(unittest.TestCase):
             "ifconfig en0",
             b"ifconfig en0",
             [""],
+            ["ifconfig", " "],
             ["ifconfig", None],
         ]:
             with self.subTest(command=command):
