@@ -15,6 +15,8 @@
   the mocked, non-privileged command baseline.
 - Rejected whitespace-only command arguments before dry-run rendering or
   subprocess execution.
+- Added a 15-second command timeout with sanitized timeout errors that omit
+  interface and MAC arguments.
 
 ## 2026-06-08
 

@@ -36,6 +36,7 @@ REQUIRED = [
     "docs/plans/2026-06-09-malformed-command-validation.md",
     "docs/plans/2026-06-09-bytecode-free-verification.md",
     "docs/plans/2026-06-10-whitespace-command-arguments.md",
+    "docs/plans/2026-06-10-command-timeout.md",
     HOSTED_VALIDATION_PLAN,
     "scripts/check-baseline.py",
     "test_spoof_mac_address.py",
@@ -97,6 +98,10 @@ def main():
         "command is required",
         "command arguments must be non-empty text",
         "argument.strip()",
+        "COMMAND_TIMEOUT_SECONDS = 15",
+        "timeout=COMMAND_TIMEOUT_SECONDS",
+        "except subprocess.TimeoutExpired",
+        ") from None",
     ]:
         if phrase not in script:
             failures.append(f"SpoofMACAddress.py must mention {phrase}")
@@ -131,6 +136,8 @@ def main():
         "test_execute_rejects_malformed_commands",
         "ifconfig en0",
         '["ifconfig", " "]',
+        "test_execute_uses_bounded_timeout",
+        "test_execute_reports_timeout_without_command_arguments",
     ]:
         if phrase not in tests:
             failures.append(f"tests must include {phrase}")
@@ -197,6 +204,7 @@ def main():
         "whitespace-only command arguments",
         "Python bytecode",
         "hosted Linux",
+        "bounded command timeout",
     ]:
         if phrase.lower() not in docs.lower():
             failures.append(f"docs must mention {phrase}")
@@ -238,6 +246,9 @@ def main():
         or "whitespace-only command arguments" not in whitespace_command_plan
     ):
         failures.append("whitespace command argument plan must record completed status and verification")
+    command_timeout_plan = read("docs/plans/2026-06-10-command-timeout.md")
+    if "status: completed" not in command_timeout_plan or "15-second" not in command_timeout_plan:
+        failures.append("command timeout plan must record completed status and verification")
     hosted_validation_plan = read(HOSTED_VALIDATION_PLAN)
     if "status: completed" not in hosted_validation_plan or "make check" not in hosted_validation_plan:
         failures.append("hosted safe validation plan must record completed status and verification")

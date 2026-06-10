@@ -98,6 +98,26 @@ class SpoofMacAddressTest(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     spoof.execute(command, dry_run=True)
 
+    def test_execute_uses_bounded_timeout(self):
+        completed = mock.Mock(returncode=0, stdout="ok", stderr="")
+        with mock.patch.object(spoof.subprocess, "run", return_value=completed) as run:
+            self.assertEqual("ok", spoof.execute(["ifconfig", "en0"]))
+
+        self.assertEqual(spoof.COMMAND_TIMEOUT_SECONDS, run.call_args.kwargs["timeout"])
+
+    def test_execute_reports_timeout_without_command_arguments(self):
+        timeout = spoof.subprocess.TimeoutExpired(
+            cmd=["ifconfig", "private-interface"],
+            timeout=spoof.COMMAND_TIMEOUT_SECONDS,
+        )
+        with mock.patch.object(spoof.subprocess, "run", side_effect=timeout):
+            with self.assertRaisesRegex(RuntimeError, "ifconfig timed out after 15 seconds") as raised:
+                spoof.execute(["ifconfig", "private-interface"])
+
+        self.assertNotIn("private-interface", str(raised.exception))
+        self.assertIsNone(raised.exception.__cause__)
+        self.assertTrue(raised.exception.__suppress_context__)
+
     def test_change_commands_are_argument_lists(self):
         commands = spoof.change_commands(
             "en0",

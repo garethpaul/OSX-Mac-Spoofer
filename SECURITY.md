@@ -46,6 +46,8 @@ Helpful reports include:
   or subprocess execution.
 - Whitespace-only command arguments should fail validation before dry-run
   rendering or subprocess execution.
+- A bounded command timeout should prevent stalled platform tools from hanging
+  the utility, and timeout errors should not expose command arguments.
 - Python bytecode is local tooling output and should not remain after
   verification gates.
 - Pinned, read-only hosted Linux validation runs only mocked command tests and

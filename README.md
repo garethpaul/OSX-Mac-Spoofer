@@ -81,6 +81,8 @@ Malformed command sequences are rejected before dry-run rendering or subprocess
 execution.
 Whitespace-only command arguments are rejected before dry-run rendering or
 subprocess execution.
+Every platform command uses a bounded command timeout of 15 seconds; timeout
+errors identify the executable without echoing interface or MAC arguments.
 Observed current and hardware addresses from `ifconfig` and `networksetup` are
 normalized separately because real hardware addresses are commonly globally
 administered.

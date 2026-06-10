@@ -13,6 +13,7 @@ from typing import Iterable, List, Optional, Sequence, Tuple
 
 DEFAULT_WIRELESS_ADDRESS = "02:23:45:67:89:ab"
 DEFAULT_WIRED_ADDRESS = "02:ef:12:34:56:78"
+COMMAND_TIMEOUT_SECONDS = 15
 
 # Path to Airport binary differs between OS X releases. This is the 10.7 path.
 PATH_TO_AIRPORT = "/System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport"
@@ -109,13 +110,19 @@ def execute(command: Sequence[str], *, dry_run: bool = False) -> str:
         print(f"+ {command_text(checked_command)}")
         return ""
 
-    result = subprocess.run(
-        checked_command,
-        check=False,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    )
+    try:
+        result = subprocess.run(
+            checked_command,
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=COMMAND_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired:
+        raise RuntimeError(
+            f"{checked_command[0]} timed out after {COMMAND_TIMEOUT_SECONDS} seconds"
+        ) from None
     if result.returncode != 0:
         detail = result.stderr.strip() or result.stdout.strip() or "no output"
         raise RuntimeError(f"{checked_command[0]} failed: {detail}")

@@ -38,6 +38,7 @@ Priority:
   execution
 - Reject whitespace-only command arguments before dry-run rendering or
   subprocess execution
+- Keep a bounded command timeout around every platform tool invocation
 - Keep verification targets from leaving Python bytecode behind
 - Keep Python 3.10 and 3.12 hosted Linux validation mocked and non-privileged
 - Keep `make lint`, `make build`, `make verify`, and `make check` available as
@@ -47,6 +48,7 @@ Next priorities:
 
 - Add macOS manual verification notes for current supported versions
 - Add more command argument validation fixtures for malformed direct calls
+- Add command failure fixtures without invoking privileged platform tools
 - Document how to restore hardware addresses
 - Document local policy expectations for choosing spoofed nonzero unicast
   addresses
