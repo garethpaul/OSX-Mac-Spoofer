@@ -1,6 +1,6 @@
 # Command Failure Output Sanitization
 
-status: planned
+status: completed
 
 ## Context
 
@@ -40,14 +40,12 @@ of either the implementation or regression test.
 
 ## Verification
 
-- Focused mocked nonzero-command failure test
-- `make lint`
-- `make test`
-- `make build`
-- `make verify`
-- `make check`
-- Hostile static-check mutations for implementation and test removal
-- `git diff --check`
+- Focused mocked nonzero-command failure and timeout tests passed.
+- `make test` passed all 15 mocked tests without privileged operations.
+- `make lint`, `make build`, `make verify`, and `make check` passed.
+- Hostile static-check mutations for implementation and test removal were
+  rejected.
+- `git diff --check` passed.
 
 ## Boundaries
 

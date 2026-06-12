@@ -118,6 +118,29 @@ class SpoofMacAddressTest(unittest.TestCase):
         self.assertIsNone(raised.exception.__cause__)
         self.assertTrue(raised.exception.__suppress_context__)
 
+    def test_execute_reports_failure_without_output_or_command_arguments(self):
+        completed = mock.Mock(
+            returncode=23,
+            stdout="private-interface 02:23:45:67:89:ab",
+            stderr="host-secret diagnostic",
+        )
+        with mock.patch.object(spoof.subprocess, "run", return_value=completed):
+            with self.assertRaisesRegex(
+                RuntimeError, "ifconfig failed with exit status 23"
+            ) as raised:
+                spoof.execute(["ifconfig", "private-interface"])
+
+        message = str(raised.exception)
+        for sensitive_value in [
+            "private-interface",
+            "02:23:45:67:89:ab",
+            "host-secret",
+            "diagnostic",
+        ]:
+            self.assertNotIn(sensitive_value, message)
+        self.assertIsNone(raised.exception.__cause__)
+        self.assertTrue(raised.exception.__suppress_context__)
+
     def test_change_commands_are_argument_lists(self):
         commands = spoof.change_commands(
             "en0",

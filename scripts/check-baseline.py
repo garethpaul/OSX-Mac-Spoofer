@@ -13,6 +13,7 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[1]
 PLAN = "docs/plans/2026-06-08-mac-spoofer-baseline.md"
 HOSTED_VALIDATION_PLAN = "docs/plans/2026-06-10-hosted-safe-validation.md"
+COMMAND_FAILURE_PLAN = "docs/plans/2026-06-12-command-failure-output-sanitization.md"
 REQUIRED = [
     ".github/workflows/check.yml",
     ".gitignore",
@@ -38,6 +39,7 @@ REQUIRED = [
     "docs/plans/2026-06-10-whitespace-command-arguments.md",
     "docs/plans/2026-06-10-command-timeout.md",
     HOSTED_VALIDATION_PLAN,
+    COMMAND_FAILURE_PLAN,
     "scripts/check-baseline.py",
     "test_spoof_mac_address.py",
 ]
@@ -101,6 +103,7 @@ def main():
         "COMMAND_TIMEOUT_SECONDS = 15",
         "timeout=COMMAND_TIMEOUT_SECONDS",
         "except subprocess.TimeoutExpired",
+        "failed with exit status",
         ") from None",
     ]:
         if phrase not in script:
@@ -138,6 +141,8 @@ def main():
         '["ifconfig", " "]',
         "test_execute_uses_bounded_timeout",
         "test_execute_reports_timeout_without_command_arguments",
+        "test_execute_reports_failure_without_output_or_command_arguments",
+        "host-secret diagnostic",
     ]:
         if phrase not in tests:
             failures.append(f"tests must include {phrase}")
@@ -205,6 +210,8 @@ def main():
         "Python bytecode",
         "hosted Linux",
         "bounded command timeout",
+        "captured output",
+        "exit status",
     ]:
         if phrase.lower() not in docs.lower():
             failures.append(f"docs must mention {phrase}")
@@ -252,6 +259,13 @@ def main():
     hosted_validation_plan = read(HOSTED_VALIDATION_PLAN)
     if "status: completed" not in hosted_validation_plan or "make check" not in hosted_validation_plan:
         failures.append("hosted safe validation plan must record completed status and verification")
+    command_failure_plan = read(COMMAND_FAILURE_PLAN)
+    if (
+        "status: completed" not in command_failure_plan
+        or "captured standard error" not in command_failure_plan
+        or "make check" not in command_failure_plan
+    ):
+        failures.append("command failure sanitization plan must record completed status and verification")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

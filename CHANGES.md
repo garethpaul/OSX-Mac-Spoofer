@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-12
+
+- Sanitized nonzero platform-command failures so errors report only the
+  executable and exit status, without captured output or command arguments.
+
 ## 2026-06-09
 
 - Rejected malformed command sequences before dry-run rendering or subprocess
