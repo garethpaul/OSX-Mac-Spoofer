@@ -55,6 +55,8 @@ Helpful reports include:
   verification gates.
 - Pinned, read-only hosted Linux validation runs only mocked command tests and
   shell syntax checks; it must never invoke privileged network changes.
+- Hosted verification uses a credential-free checkout so its read-only token is
+  not retained in the runner's Git configuration.
 - No primary dependency manifest was detected in the repository root. If dependencies are added later, include a manifest and prefer reproducible installation instructions.
 
 

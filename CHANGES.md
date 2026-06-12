@@ -2,6 +2,8 @@
 
 ## 2026-06-12
 
+- Disabled persisted checkout credentials and enforced the sole pinned
+  credential-free workflow boundary.
 - Sanitized nonzero platform-command failures so errors report only the
   executable and exit status, without captured output or command arguments.
 

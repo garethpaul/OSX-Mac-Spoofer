@@ -42,6 +42,7 @@ Priority:
 - Keep nonzero command errors free of captured output and command arguments
 - Keep verification targets from leaving Python bytecode behind
 - Keep Python 3.10 and 3.12 hosted Linux validation mocked and non-privileged
+- Keep hosted source retrieval credential-free after checkout
 - Keep `make lint`, `make build`, `make verify`, and `make check` available as
   local verification gates
 

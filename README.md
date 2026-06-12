@@ -102,7 +102,8 @@ explicitly intended.
 - `python3 -m unittest discover -v`
 - `python3 SpoofMACAddress.py --dry-run`
 - Pinned hosted Linux validation runs the mocked, non-privileged gate on Python
-  3.10 and 3.12. It never changes an interface or invokes `sudo`.
+  3.10 and 3.12. It never changes an interface or invokes `sudo`. Checkout
+  credentials are not persisted after source retrieval.
 
 `make lint` runs the Python, shell, and static baseline checks; `make build`
 uses the no-network unittest suite as the build-through-test gate; and

@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PLAN = "docs/plans/2026-06-08-mac-spoofer-baseline.md"
 HOSTED_VALIDATION_PLAN = "docs/plans/2026-06-10-hosted-safe-validation.md"
 COMMAND_FAILURE_PLAN = "docs/plans/2026-06-12-command-failure-output-sanitization.md"
+CHECKOUT_CREDENTIAL_PLAN = "docs/plans/2026-06-12-checkout-credential-boundary.md"
 REQUIRED = [
     ".github/workflows/check.yml",
     ".gitignore",
@@ -41,6 +42,7 @@ REQUIRED = [
     "docs/plans/2026-06-10-command-timeout.md",
     HOSTED_VALIDATION_PLAN,
     COMMAND_FAILURE_PLAN,
+    CHECKOUT_CREDENTIAL_PLAN,
     "scripts/check-baseline.py",
     "test_spoof_mac_address.py",
 ]
@@ -171,6 +173,22 @@ def main():
             failures.append(f"Makefile must include {phrase}")
 
     workflow = read(".github/workflows/check.yml")
+    workflow_files = sorted(
+        path.relative_to(ROOT).as_posix()
+        for path in (ROOT / ".github/workflows").iterdir()
+        if path.is_file()
+    )
+    checkout_step = (
+        "      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10\n"
+        "        with:\n"
+        "          persist-credentials: false"
+    )
+    if workflow_files != [".github/workflows/check.yml"]:
+        failures.append("workflow inventory must contain only .github/workflows/check.yml")
+    if workflow.count("actions/checkout@") != 1 or checkout_step not in workflow:
+        failures.append("Check workflow must use one pinned credential-free checkout")
+    if workflow.count("persist-credentials:") != 1 or "persist-credentials: true" in workflow:
+        failures.append("Check workflow must not persist checkout credentials")
     for expected in [
         "permissions:\n  contents: read",
         "cancel-in-progress: true",
@@ -269,6 +287,13 @@ def main():
     if "status: completed" not in hosted_validation_plan or "make check" not in hosted_validation_plan:
         failures.append("hosted safe validation plan must record completed status and verification")
     command_failure_plan = read(COMMAND_FAILURE_PLAN)
+    checkout_credential_plan = read(CHECKOUT_CREDENTIAL_PLAN)
+    if (
+        "status: completed" not in checkout_credential_plan.lower()
+        or "persist-credentials: false" not in checkout_credential_plan
+        or "hostile mutations rejected" not in checkout_credential_plan
+    ):
+        failures.append("checkout credential plan must record completed verification")
     command_failure_status = re.findall(
         r"(?mi)^status:\s*(.+?)\s*$", command_failure_plan
     )
@@ -304,6 +329,15 @@ def main():
             failures.append(
                 f"command failure sanitization plan must preserve verification evidence: {evidence}"
             )
+
+    guidance = " ".join(
+        "\n".join(read(path) for path in ["README.md", "SECURITY.md", "VISION.md", "CHANGES.md"]).split()
+    ).lower()
+    if (
+        "checkout credentials are not persisted" not in guidance
+        or "credential-free checkout" not in guidance
+    ):
+        failures.append("repository guidance must document the credential-free checkout boundary")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")
