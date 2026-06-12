@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PLAN = "docs/plans/2026-06-08-mac-spoofer-baseline.md"
 REQUIRED = [
     ".gitignore",
+    ".github/workflows/check.yml",
     "CHANGES.md",
     "Makefile",
     "README.md",
@@ -34,6 +35,7 @@ REQUIRED = [
     "docs/plans/2026-06-09-malformed-command-validation.md",
     "docs/plans/2026-06-09-bytecode-free-verification.md",
     "docs/plans/2026-06-10-whitespace-command-arguments.md",
+    "docs/plans/2026-06-10-ci-baseline.md",
     "scripts/check-baseline.py",
     "test_spoof_mac_address.py",
 ]
@@ -178,9 +180,17 @@ def main():
         "malformed command sequences",
         "whitespace-only command arguments",
         "Python bytecode",
+        "GitHub Actions",
     ]:
         if phrase.lower() not in docs.lower():
             failures.append(f"docs must mention {phrase}")
+
+    workflow = read(".github/workflows/check.yml")
+    for phrase in ["actions/checkout@v4", "actions/setup-python@v5", 'python-version: "3.12"', "run: make check"]:
+        if phrase not in workflow:
+            failures.append(f"GitHub Actions workflow must include {phrase}")
+    if "GitHub Actions" not in read("CHANGES.md"):
+        failures.append("CHANGES.md must record the GitHub Actions CI baseline")
 
     plan = read(PLAN)
     if "status: completed" not in plan or "make check" not in plan:
@@ -219,6 +229,9 @@ def main():
         or "whitespace-only command arguments" not in whitespace_command_plan
     ):
         failures.append("whitespace command argument plan must record completed status and verification")
+    ci_plan = read("docs/plans/2026-06-10-ci-baseline.md")
+    if "status: completed" not in ci_plan or "make check" not in ci_plan:
+        failures.append("CI baseline plan must record completed status and verification")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

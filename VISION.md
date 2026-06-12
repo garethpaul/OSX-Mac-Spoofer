@@ -39,6 +39,7 @@ Priority:
 - Reject whitespace-only command arguments before dry-run rendering or
   subprocess execution
 - Keep verification targets from leaving Python bytecode behind
+- Keep GitHub Actions aligned with the local Python `make check` baseline
 - Keep `make lint`, `make build`, `make verify`, and `make check` available as
   local verification gates
 
@@ -61,6 +62,8 @@ Contribution rules:
   parser, validation, and dry-run changes.
 - Preserve bytecode-free verification when changing Makefile gates.
 - Include manual verification notes for macOS changes.
+- Keep `.github/workflows/check.yml` in sync with the local validation and
+  dry-run guard.
 
 ## Security And Responsible Use
 

@@ -48,6 +48,9 @@ Helpful reports include:
   rendering or subprocess execution.
 - Python bytecode is local tooling output and should not remain after
   verification gates.
+- GitHub Actions runs `make check` for pushes and pull requests so command
+  validation, dry-run, shell wrapper, and bytecode-free guardrails stay
+  enforced before merge.
 - No primary dependency manifest was detected in the repository root. If dependencies are added later, include a manifest and prefer reproducible installation instructions.
 
 

@@ -11,6 +11,8 @@
 
 ## 2026-06-10
 
+- Added a GitHub Actions workflow that installs Python 3.12 and runs
+  `make check`.
 - Rejected whitespace-only command arguments before dry-run rendering or
   subprocess execution.
 
