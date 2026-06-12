@@ -12,9 +12,11 @@ import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 PLAN = "docs/plans/2026-06-08-mac-spoofer-baseline.md"
+HOSTED_VALIDATION_PLAN = "docs/plans/2026-06-10-hosted-safe-validation.md"
 REQUIRED = [
-    ".gitignore",
+    ".github/CODEOWNERS",
     ".github/workflows/check.yml",
+    ".gitignore",
     "CHANGES.md",
     "Makefile",
     "README.md",
@@ -35,7 +37,8 @@ REQUIRED = [
     "docs/plans/2026-06-09-malformed-command-validation.md",
     "docs/plans/2026-06-09-bytecode-free-verification.md",
     "docs/plans/2026-06-10-whitespace-command-arguments.md",
-    "docs/plans/2026-06-10-ci-baseline.md",
+    "docs/plans/2026-06-10-command-timeout.md",
+    HOSTED_VALIDATION_PLAN,
     "scripts/check-baseline.py",
     "test_spoof_mac_address.py",
 ]
@@ -96,6 +99,10 @@ def main():
         "command is required",
         "command arguments must be non-empty text",
         "argument.strip()",
+        "COMMAND_TIMEOUT_SECONDS = 15",
+        "timeout=COMMAND_TIMEOUT_SECONDS",
+        "except subprocess.TimeoutExpired",
+        ") from None",
     ]:
         if phrase not in script:
             failures.append(f"SpoofMACAddress.py must mention {phrase}")
@@ -130,6 +137,8 @@ def main():
         "test_execute_rejects_malformed_commands",
         "ifconfig en0",
         '["ifconfig", " "]',
+        "test_execute_uses_bounded_timeout",
+        "test_execute_reports_timeout_without_command_arguments",
     ]:
         if phrase not in tests:
             failures.append(f"tests must include {phrase}")
@@ -147,6 +156,28 @@ def main():
     ]:
         if phrase not in makefile:
             failures.append(f"Makefile must include {phrase}")
+
+    workflow = read(".github/workflows/check.yml")
+    codeowners = read(".github/CODEOWNERS")
+    for expected in [
+        "permissions:\n  contents: read",
+        "cancel-in-progress: true",
+        "runs-on: ubuntu-24.04",
+        "timeout-minutes: 10",
+        "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10",
+        "persist-credentials: false",
+        "actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405",
+        'python-version: ["3.10", "3.12"]',
+        "PYTHONDONTWRITEBYTECODE: \"1\"",
+        "run: make check",
+    ]:
+        if expected not in workflow:
+            failures.append(f"Check workflow must keep {expected}")
+    workflow_files = sorted(str(path.relative_to(ROOT)) for path in (ROOT / ".github/workflows").rglob("*") if path.is_file())
+    if workflow_files != [".github/workflows/check.yml"]:
+        failures.append("check.yml must be the repository's only hosted workflow")
+    if codeowners.strip() != "* @garethpaul":
+        failures.append("CODEOWNERS must assign the repository to @garethpaul")
 
     gitignore = read(".gitignore")
     for phrase in ["__pycache__/", ".env", "*.log", "tmp/"]:
@@ -180,17 +211,11 @@ def main():
         "malformed command sequences",
         "whitespace-only command arguments",
         "Python bytecode",
-        "GitHub Actions",
+        "hosted Linux",
+        "bounded command timeout",
     ]:
         if phrase.lower() not in docs.lower():
             failures.append(f"docs must mention {phrase}")
-
-    workflow = read(".github/workflows/check.yml")
-    for phrase in ["actions/checkout@v4", "actions/setup-python@v5", 'python-version: "3.12"', "run: make check"]:
-        if phrase not in workflow:
-            failures.append(f"GitHub Actions workflow must include {phrase}")
-    if "GitHub Actions" not in read("CHANGES.md"):
-        failures.append("CHANGES.md must record the GitHub Actions CI baseline")
 
     plan = read(PLAN)
     if "status: completed" not in plan or "make check" not in plan:
@@ -229,8 +254,14 @@ def main():
         or "whitespace-only command arguments" not in whitespace_command_plan
     ):
         failures.append("whitespace command argument plan must record completed status and verification")
-    ci_plan = read("docs/plans/2026-06-10-ci-baseline.md")
-    if "status: completed" not in ci_plan or "make check" not in ci_plan:
+    command_timeout_plan = read("docs/plans/2026-06-10-command-timeout.md")
+    if "status: completed" not in command_timeout_plan or "15-second" not in command_timeout_plan:
+        failures.append("command timeout plan must record completed status and verification")
+    hosted_validation_plan = read(HOSTED_VALIDATION_PLAN)
+    if "status: completed" not in hosted_validation_plan or "make check" not in hosted_validation_plan:
+        failures.append("hosted safe validation plan must record completed status and verification")
+    prepared_ci_plan = read("docs/plans/2026-06-10-ci-baseline.md")
+    if "status: completed" not in prepared_ci_plan or "make check" not in prepared_ci_plan:
         failures.append("CI baseline plan must record completed status and verification")
 
     try:

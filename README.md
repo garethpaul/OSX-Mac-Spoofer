@@ -81,6 +81,8 @@ Malformed command sequences are rejected before dry-run rendering or subprocess
 execution.
 Whitespace-only command arguments are rejected before dry-run rendering or
 subprocess execution.
+Every platform command uses a bounded command timeout of 15 seconds; timeout
+errors identify the executable without echoing interface or MAC arguments.
 Observed current and hardware addresses from `ifconfig` and `networksetup` are
 normalized separately because real hardware addresses are commonly globally
 administered.
@@ -97,6 +99,8 @@ explicitly intended.
 - `make verify`
 - `python3 -m unittest discover -v`
 - `python3 SpoofMACAddress.py --dry-run`
+- Pinned hosted Linux validation runs the mocked, non-privileged gate on Python
+  3.10 and 3.12. It never changes an interface or invokes `sudo`.
 
 `make lint` runs the Python, shell, and static baseline checks; `make build`
 uses the no-network unittest suite as the build-through-test gate; and

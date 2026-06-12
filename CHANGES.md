@@ -11,10 +11,13 @@
 
 ## 2026-06-10
 
-- Added a GitHub Actions workflow that installs Python 3.12 and runs
-  `make check`.
+- Added GitHub Actions CI for the safe no-network `make check` baseline.
+- Added pinned, read-only hosted Linux validation on Python 3.10 and 3.12 for
+  the mocked, non-privileged command baseline.
 - Rejected whitespace-only command arguments before dry-run rendering or
   subprocess execution.
+- Added a 15-second command timeout with sanitized timeout errors that omit
+  interface and MAC arguments.
 
 ## 2026-06-08
 

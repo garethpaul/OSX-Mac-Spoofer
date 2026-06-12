@@ -38,8 +38,10 @@ Priority:
   execution
 - Reject whitespace-only command arguments before dry-run rendering or
   subprocess execution
+- Keep a bounded command timeout around every platform tool invocation
 - Keep verification targets from leaving Python bytecode behind
-- Keep GitHub Actions aligned with the local Python `make check` baseline
+- Keep Python 3.10 and 3.12 hosted Linux validation mocked and non-privileged
+- Keep GitHub Actions aligned with `make check`
 - Keep `make lint`, `make build`, `make verify`, and `make check` available as
   local verification gates
 
@@ -47,6 +49,7 @@ Next priorities:
 
 - Add macOS manual verification notes for current supported versions
 - Add more command argument validation fixtures for malformed direct calls
+- Add command failure fixtures without invoking privileged platform tools
 - Document how to restore hardware addresses
 - Document local policy expectations for choosing spoofed nonzero unicast
   addresses
@@ -62,8 +65,6 @@ Contribution rules:
   parser, validation, and dry-run changes.
 - Preserve bytecode-free verification when changing Makefile gates.
 - Include manual verification notes for macOS changes.
-- Keep `.github/workflows/check.yml` in sync with the local validation and
-  dry-run guard.
 
 ## Security And Responsible Use
 

@@ -46,11 +46,13 @@ Helpful reports include:
   or subprocess execution.
 - Whitespace-only command arguments should fail validation before dry-run
   rendering or subprocess execution.
+- A bounded command timeout should prevent stalled platform tools from hanging
+  the utility, and timeout errors should not expose command arguments.
 - Python bytecode is local tooling output and should not remain after
   verification gates.
-- GitHub Actions runs `make check` for pushes and pull requests so command
-  validation, dry-run, shell wrapper, and bytecode-free guardrails stay
-  enforced before merge.
+- Pinned, read-only hosted Linux validation runs only mocked command tests and
+  shell syntax checks; it must never invoke privileged network changes.
+- Keep GitHub Actions aligned with the safe no-network `make check` baseline.
 - No primary dependency manifest was detected in the repository root. If dependencies are added later, include a manifest and prefer reproducible installation instructions.
 
 
