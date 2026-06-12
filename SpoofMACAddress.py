@@ -124,8 +124,9 @@ def execute(command: Sequence[str], *, dry_run: bool = False) -> str:
             f"{checked_command[0]} timed out after {COMMAND_TIMEOUT_SECONDS} seconds"
         ) from None
     if result.returncode != 0:
-        detail = result.stderr.strip() or result.stdout.strip() or "no output"
-        raise RuntimeError(f"{checked_command[0]} failed: {detail}")
+        raise RuntimeError(
+            f"{checked_command[0]} failed with exit status {result.returncode}"
+        ) from None
     return result.stdout
 
 

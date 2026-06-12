@@ -4,6 +4,7 @@
 from pathlib import Path
 import ast
 import os
+import re
 import stat
 import subprocess
 import sys
@@ -13,6 +14,7 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[1]
 PLAN = "docs/plans/2026-06-08-mac-spoofer-baseline.md"
 HOSTED_VALIDATION_PLAN = "docs/plans/2026-06-10-hosted-safe-validation.md"
+COMMAND_FAILURE_PLAN = "docs/plans/2026-06-12-command-failure-output-sanitization.md"
 REQUIRED = [
     ".github/workflows/check.yml",
     ".gitignore",
@@ -38,6 +40,7 @@ REQUIRED = [
     "docs/plans/2026-06-10-whitespace-command-arguments.md",
     "docs/plans/2026-06-10-command-timeout.md",
     HOSTED_VALIDATION_PLAN,
+    COMMAND_FAILURE_PLAN,
     "scripts/check-baseline.py",
     "test_spoof_mac_address.py",
 ]
@@ -45,6 +48,14 @@ REQUIRED = [
 
 def read(path):
     return (ROOT / path).read_text(encoding="utf-8", errors="replace")
+
+
+def markdown_section(text, heading):
+    match = re.search(
+        rf"(?ms)^## {re.escape(heading)}\s*$\n(.*?)(?=^## |\Z)",
+        text,
+    )
+    return match.group(1).strip() if match else ""
 
 
 def is_executable(path):
@@ -101,6 +112,7 @@ def main():
         "COMMAND_TIMEOUT_SECONDS = 15",
         "timeout=COMMAND_TIMEOUT_SECONDS",
         "except subprocess.TimeoutExpired",
+        "failed with exit status",
         ") from None",
     ]:
         if phrase not in script:
@@ -138,6 +150,8 @@ def main():
         '["ifconfig", " "]',
         "test_execute_uses_bounded_timeout",
         "test_execute_reports_timeout_without_command_arguments",
+        "test_execute_reports_failure_without_output_or_command_arguments",
+        "host-secret diagnostic",
     ]:
         if phrase not in tests:
             failures.append(f"tests must include {phrase}")
@@ -205,6 +219,8 @@ def main():
         "Python bytecode",
         "hosted Linux",
         "bounded command timeout",
+        "captured output",
+        "exit status",
     ]:
         if phrase.lower() not in docs.lower():
             failures.append(f"docs must mention {phrase}")
@@ -252,6 +268,42 @@ def main():
     hosted_validation_plan = read(HOSTED_VALIDATION_PLAN)
     if "status: completed" not in hosted_validation_plan or "make check" not in hosted_validation_plan:
         failures.append("hosted safe validation plan must record completed status and verification")
+    command_failure_plan = read(COMMAND_FAILURE_PLAN)
+    command_failure_status = re.findall(
+        r"(?mi)^status:\s*(.+?)\s*$", command_failure_plan
+    )
+    command_failure_work = markdown_section(command_failure_plan, "Work Completed")
+    command_failure_verification = markdown_section(
+        command_failure_plan, "Verification Completed"
+    )
+    if command_failure_status != ["completed"] or not command_failure_work:
+        failures.append(
+            "command failure sanitization plan must record one completed status and completed work"
+        )
+    if not command_failure_verification or re.search(
+        r"(?i)\b(?:pending|todo|tbd|not run)\b", command_failure_verification
+    ):
+        failures.append(
+            "command failure sanitization plan must record finished verification without pending markers"
+        )
+    for evidence in [
+        "make test",
+        "make lint",
+        "make build",
+        "make verify",
+        "make check",
+        "git diff --check",
+        "27398625285",
+        "27398635683",
+        "8f20cefeb97e7be7dadd026db421d555f5c8f281",
+        "failed with exit status",
+        "test_execute_reports_failure_without_output_or_command_arguments",
+        "host-secret diagnostic",
+    ]:
+        if evidence not in command_failure_verification:
+            failures.append(
+                f"command failure sanitization plan must preserve verification evidence: {evidence}"
+            )
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

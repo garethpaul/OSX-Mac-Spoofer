@@ -48,6 +48,9 @@ Helpful reports include:
   rendering or subprocess execution.
 - A bounded command timeout should prevent stalled platform tools from hanging
   the utility, and timeout errors should not expose command arguments.
+- Nonzero command failures should report only the executable and exit status;
+  captured standard output, standard error, and command arguments may contain
+  host-specific details and should not be repeated.
 - Python bytecode is local tooling output and should not remain after
   verification gates.
 - Pinned, read-only hosted Linux validation runs only mocked command tests and
