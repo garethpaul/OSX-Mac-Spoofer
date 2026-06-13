@@ -41,6 +41,7 @@ Priority:
 - Keep a bounded command timeout around every platform tool invocation
 - Keep verification targets from leaving Python bytecode behind
 - Keep Python 3.10 and 3.12 hosted Linux validation mocked and non-privileged
+- Keep GitHub Actions aligned with `make check`
 - Keep `make lint`, `make build`, `make verify`, and `make check` available as
   local verification gates
 

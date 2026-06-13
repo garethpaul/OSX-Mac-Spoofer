@@ -52,6 +52,7 @@ Helpful reports include:
   verification gates.
 - Pinned, read-only hosted Linux validation runs only mocked command tests and
   shell syntax checks; it must never invoke privileged network changes.
+- Keep GitHub Actions aligned with the safe no-network `make check` baseline.
 - No primary dependency manifest was detected in the repository root. If dependencies are added later, include a manifest and prefer reproducible installation instructions.
 
 

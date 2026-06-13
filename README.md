@@ -107,6 +107,8 @@ uses the no-network unittest suite as the build-through-test gate; and
 `make verify` delegates to the full `make check` workflow.
 Verification runs with Python bytecode writes disabled and uses a bytecode-free
 syntax compile, so no `__pycache__` output should remain after the gates.
+GitHub Actions installs Python 3.12 and runs `make check` for pushes and pull
+requests.
 
 When the required SDK or runtime is unavailable, use static checks and source review first, then verify on a machine that has the matching platform toolchain.
 
@@ -142,6 +144,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   the current modernization baseline.
 - See `docs/plans/2026-06-09-make-gate-aliases.md` for the local Make gate
   aliases.
+- See `docs/plans/2026-06-10-ci-baseline.md` for the hosted GitHub Actions
+  baseline.
 - See `VISION.md` for project direction and contribution guardrails.
 
 ## Contributing

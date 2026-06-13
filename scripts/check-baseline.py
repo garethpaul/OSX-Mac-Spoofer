@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PLAN = "docs/plans/2026-06-08-mac-spoofer-baseline.md"
 HOSTED_VALIDATION_PLAN = "docs/plans/2026-06-10-hosted-safe-validation.md"
 REQUIRED = [
+    ".github/CODEOWNERS",
     ".github/workflows/check.yml",
     ".gitignore",
     "CHANGES.md",
@@ -157,12 +158,14 @@ def main():
             failures.append(f"Makefile must include {phrase}")
 
     workflow = read(".github/workflows/check.yml")
+    codeowners = read(".github/CODEOWNERS")
     for expected in [
         "permissions:\n  contents: read",
         "cancel-in-progress: true",
         "runs-on: ubuntu-24.04",
         "timeout-minutes: 10",
         "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10",
+        "persist-credentials: false",
         "actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405",
         'python-version: ["3.10", "3.12"]',
         "PYTHONDONTWRITEBYTECODE: \"1\"",
@@ -170,6 +173,11 @@ def main():
     ]:
         if expected not in workflow:
             failures.append(f"Check workflow must keep {expected}")
+    workflow_files = sorted(str(path.relative_to(ROOT)) for path in (ROOT / ".github/workflows").rglob("*") if path.is_file())
+    if workflow_files != [".github/workflows/check.yml"]:
+        failures.append("check.yml must be the repository's only hosted workflow")
+    if codeowners.strip() != "* @garethpaul":
+        failures.append("CODEOWNERS must assign the repository to @garethpaul")
 
     gitignore = read(".gitignore")
     for phrase in ["__pycache__/", ".env", "*.log", "tmp/"]:
@@ -252,6 +260,9 @@ def main():
     hosted_validation_plan = read(HOSTED_VALIDATION_PLAN)
     if "status: completed" not in hosted_validation_plan or "make check" not in hosted_validation_plan:
         failures.append("hosted safe validation plan must record completed status and verification")
+    prepared_ci_plan = read("docs/plans/2026-06-10-ci-baseline.md")
+    if "status: completed" not in prepared_ci_plan or "make check" not in prepared_ci_plan:
+        failures.append("CI baseline plan must record completed status and verification")
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")
