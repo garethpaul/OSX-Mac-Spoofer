@@ -45,12 +45,13 @@ Priority:
 - Keep hosted source retrieval credential-free after checkout
 - Keep `make lint`, `make build`, `make verify`, and `make check` available as
   local verification gates
+- Keep hardware-address restoration explicit, privately recorded, manually
+  verified, and separate from locally administered spoof-target validation
 
 Next priorities:
 
 - Add macOS manual verification notes for current supported versions
 - Add more command argument validation fixtures for malformed direct calls
-- Document how to restore hardware addresses
 - Document local policy expectations for choosing spoofed nonzero unicast
   addresses
 - Consider replacing the legacy `/etc/rc.common` wrapper with a clearly

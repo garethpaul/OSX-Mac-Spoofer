@@ -16,6 +16,7 @@ PLAN = "docs/plans/2026-06-08-mac-spoofer-baseline.md"
 HOSTED_VALIDATION_PLAN = "docs/plans/2026-06-10-hosted-safe-validation.md"
 COMMAND_FAILURE_PLAN = "docs/plans/2026-06-12-command-failure-output-sanitization.md"
 CHECKOUT_CREDENTIAL_PLAN = "docs/plans/2026-06-12-checkout-credential-boundary.md"
+RESTORATION_PLAN = "docs/plans/2026-06-13-hardware-address-restoration.md"
 REQUIRED = [
     ".github/workflows/check.yml",
     ".gitignore",
@@ -28,6 +29,7 @@ REQUIRED = [
     "StartupParameters.plist",
     "VISION.md",
     "docs/readme-overview.svg",
+    "docs/hardware-address-restoration.md",
     PLAN,
     "docs/plans/2026-06-09-nonzero-mac-validation.md",
     "docs/plans/2026-06-09-local-admin-mac-validation.md",
@@ -43,6 +45,7 @@ REQUIRED = [
     HOSTED_VALIDATION_PLAN,
     COMMAND_FAILURE_PLAN,
     CHECKOUT_CREDENTIAL_PLAN,
+    RESTORATION_PLAN,
     "scripts/check-baseline.py",
     "test_spoof_mac_address.py",
 ]
@@ -329,6 +332,62 @@ def main():
             failures.append(
                 f"command failure sanitization plan must preserve verification evidence: {evidence}"
             )
+
+    restoration = " ".join(read("docs/hardware-address-restoration.md").split())
+    for phrase in [
+        "Review date: 2026-06-13",
+        "authorized operator restoring one known macOS network interface",
+        "current address",
+        "hardware address",
+        "locally administered unicast address",
+        "approved private operational record",
+        'networksetup -getmacaddress "$INTERFACE"',
+        'ifconfig "$INTERFACE" | awk',
+        'SpoofMACAddress.py "$INTERFACE" 02:23:45:67:89:ab --dry-run',
+        "Dry-run mode must remain subprocess-free",
+        'sudo ifconfig "$INTERFACE" ether "$HARDWARE_ADDRESS"',
+        "networksetup -detectnewhardware",
+        "intentionally separate from `SpoofMACAddress.py`",
+        "must continue to reject globally administered addresses",
+        "current address matches the recorded hardware address",
+        "applicable access-control, inventory, and network-policy checks pass",
+        "no startup wrapper or other automation",
+        "Stop rather than trying unrelated interfaces or addresses",
+        "Never add automatic startup restoration, hidden persistence",
+    ]:
+        if phrase not in restoration:
+            failures.append(f"hardware restoration guidance must include {phrase}")
+
+    restoration_plan = read(RESTORATION_PLAN)
+    restoration_status = re.findall(r"(?mi)^status:\s*(.+?)\s*$", restoration_plan)
+    restoration_work = markdown_section(restoration_plan, "Work Completed")
+    restoration_verification = markdown_section(
+        restoration_plan, "Verification Completed"
+    )
+    if restoration_status != ["completed"] or not restoration_work:
+        failures.append(
+            "hardware restoration plan must record one completed status and completed work"
+        )
+    if not restoration_verification or re.search(
+        r"(?i)\b(?:pending|todo|tbd|not run)\b", restoration_verification
+    ):
+        failures.append("hardware restoration plan must record completed verification")
+    for evidence in [
+        "make lint",
+        "make test",
+        "make build",
+        "make verify",
+        "make check",
+        "external working directory",
+        "workflow YAML",
+        "StartupParameters.plist",
+        "hostile mutations rejected",
+        "implementation and test paths had no diff",
+        "git diff --check",
+        "secret, captured-identifier, and generated-artifact scan",
+    ]:
+        if evidence not in restoration_verification:
+            failures.append(f"hardware restoration verification must record {evidence}")
 
     guidance = " ".join(
         "\n".join(read(path) for path in ["README.md", "SECURITY.md", "VISION.md", "CHANGES.md"]).split()

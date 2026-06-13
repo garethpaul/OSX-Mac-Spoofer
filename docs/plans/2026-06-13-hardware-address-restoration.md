@@ -1,6 +1,6 @@
 # Hardware Address Restoration Guidance
 
-status: planned
+status: completed
 
 ## Context
 
@@ -72,7 +72,7 @@ completed plan status, and truthful verification evidence.
 - `make verify`
 - `make check`
 - run the checker from an external working directory
-- parse workflow YAML and plist
+- parse workflow YAML and statically verify the legacy OpenStep plist contract
 - run focused hostile mutations against restoration safety boundaries
 - verify `SpoofMACAddress.py`, `SpoofMACAddress`, `StartupParameters.plist`, and
   tests have no diff
@@ -86,3 +86,23 @@ completed plan status, and truthful verification evidence.
 - Do not weaken locally administered spoof-target validation.
 - Do not claim one procedure works on every macOS release, interface type,
   managed device, or network.
+
+## Work Completed
+
+Added a restoration runbook covering private pre-change capture, address-role
+boundaries, dry-run review, explicit direct restoration, state/connectivity
+verification, and failure escalation without changing command behavior.
+
+## Verification Completed
+
+- `make lint`, `make test`, `make build`, `make verify`, and `make check`
+  passed.
+- The checker passed from an external working directory; workflow YAML parsed
+  successfully, and the legacy `StartupParameters.plist` static contract was
+  verified.
+- Ten focused hostile mutations rejected weakened capture, validator,
+  verification, anti-persistence, and completed-plan requirements.
+- `implementation and test paths had no diff`, including `SpoofMACAddress.py`,
+  `SpoofMACAddress`, `StartupParameters.plist`, and `test_spoof_mac_address.py`.
+- `git diff --check` passed.
+- The `secret, captured-identifier, and generated-artifact scan` passed.

@@ -39,6 +39,11 @@ Helpful reports include:
 - Observed current or hardware MAC addresses from macOS command output should
   be normalized without requiring the local-admin bit, because hardware
   addresses are commonly globally administered.
+- Hardware restoration must use the exact interface and address captured in an
+  approved private operational record before a change. Do not weaken locally
+  administered spoof-target validation, copy another device's address,
+  enumerate unrelated interfaces, or store captured identifiers in repository
+  artifacts.
 - Non-string MAC address and interface values should fail validation before any
   command arguments are built.
 - Non-string command output should fail validation before observed MAC parsing.
