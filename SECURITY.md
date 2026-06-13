@@ -56,6 +56,8 @@ Helpful reports include:
 - Nonzero command failures should report only the executable and exit status;
   captured standard output, standard error, and command arguments may contain
   host-specific details and should not be repeated.
+- Post-change verification should require the observed address to match the
+  requested target and report mismatches without interface or MAC identifiers.
 - Python bytecode is local tooling output and should not remain after
   verification gates.
 - Pinned, read-only hosted Linux validation runs only mocked command tests and

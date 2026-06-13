@@ -2,6 +2,8 @@
 
 ## 2026-06-13
 
+- Verify the observed post-command interface address matches the requested
+  target before reporting a successful change.
 - Added an explicit hardware-address restoration runbook covering private
   pre-change capture, dry-run review, direct restoration, state/connectivity
   verification, failure escalation, and anti-persistence boundaries.
