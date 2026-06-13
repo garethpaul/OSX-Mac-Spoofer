@@ -40,6 +40,8 @@ Priority:
   subprocess execution
 - Keep a bounded command timeout around every platform tool invocation
 - Keep nonzero command errors free of captured output and command arguments
+- Require the observed post-command address to match the requested target
+  before reporting success
 - Keep verification targets from leaving Python bytecode behind
 - Keep Python 3.10 and 3.12 hosted Linux validation mocked and non-privileged
 - Keep hosted source retrieval credential-free after checkout

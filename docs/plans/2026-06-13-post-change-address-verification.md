@@ -1,6 +1,6 @@
 # Post-Change Address Verification
 
-status: pending
+status: completed
 
 ## Context
 
@@ -24,8 +24,24 @@ does not match the validated target.
 
 ## Work Completed
 
-Pending implementation.
+- Added a normalized post-command equality check before hardware-address lookup
+  and success output.
+- Added a fully mocked live-path regression test that forces a mismatch, proves
+  all four intended commands ran, prevents the follow-up hardware query, and
+  verifies the error omits interface and MAC identifiers.
+- Added current operator/security guidance plus ordering-sensitive source,
+  test, documentation, and completed-plan contracts.
 
 ## Verification Completed
 
-Pending implementation and validation.
+- `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest -v test_spoof_mac_address.py`
+- `make lint`, `make test`, `make build`, `make verify`, and `make check`
+- Ran the baseline checker from an external working directory.
+- Parsed the workflow YAML and passed the legacy `StartupParameters.plist`
+  static contract.
+- Confirmed focused hostile mutations to comparison ordering, test assertions,
+  current documentation, and completed-plan evidence are rejected.
+- `git diff --check`
+- The intended-path secret and generated-artifact scan passed; no privileged
+  command ran, and command order, defaults, launch behavior, restoration
+  guidance, dependencies, and timeout handling had no unrelated diff.

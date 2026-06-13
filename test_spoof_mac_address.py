@@ -162,6 +162,28 @@ class SpoofMacAddressTest(unittest.TestCase):
         self.assertIn("Dry run", output.getvalue())
         self.assertIn("ifconfig en0 ether 02:23:45:67:89:ab", output.getvalue())
 
+    def test_set_mac_address_rejects_post_change_mismatch_without_identifiers(self):
+        with mock.patch.object(spoof, "execute") as execute:
+            with mock.patch.object(
+                spoof,
+                "get_mac_address",
+                side_effect=["00:23:45:67:89:ab", "02:aa:bb:cc:dd:ee"],
+            ) as get_mac_address:
+                with self.assertRaisesRegex(
+                    RuntimeError, "interface did not adopt requested MAC address"
+                ) as raised:
+                    spoof.set_mac_address("en0", "02:23:45:67:89:ab")
+
+        self.assertEqual(4, execute.call_count)
+        self.assertEqual(
+            [mock.call("en0"), mock.call("en0")],
+            get_mac_address.call_args_list,
+        )
+        message = str(raised.exception)
+        self.assertNotIn("en0", message)
+        self.assertNotIn("02:23:45:67:89:ab", message)
+        self.assertNotIn("02:aa:bb:cc:dd:ee", message)
+
     def test_resolve_target_defaults_and_manual_values(self):
         args = argparse.Namespace(
             interface=None,

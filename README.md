@@ -85,6 +85,8 @@ Every platform command uses a bounded command timeout of 15 seconds; timeout
 errors identify the executable without echoing interface or MAC arguments.
 Nonzero command failures likewise report only the executable and exit status,
 without repeating command arguments or captured output.
+Live success is reported only after the observed interface address matches the
+validated target; mismatch errors omit the interface and both MAC addresses.
 Observed current and hardware addresses from `ifconfig` and `networksetup` are
 normalized separately because real hardware addresses are commonly globally
 administered.

@@ -17,6 +17,7 @@ HOSTED_VALIDATION_PLAN = "docs/plans/2026-06-10-hosted-safe-validation.md"
 COMMAND_FAILURE_PLAN = "docs/plans/2026-06-12-command-failure-output-sanitization.md"
 CHECKOUT_CREDENTIAL_PLAN = "docs/plans/2026-06-12-checkout-credential-boundary.md"
 RESTORATION_PLAN = "docs/plans/2026-06-13-hardware-address-restoration.md"
+POST_CHANGE_PLAN = "docs/plans/2026-06-13-post-change-address-verification.md"
 REQUIRED = [
     ".github/workflows/check.yml",
     ".gitignore",
@@ -46,6 +47,7 @@ REQUIRED = [
     COMMAND_FAILURE_PLAN,
     CHECKOUT_CREDENTIAL_PLAN,
     RESTORATION_PLAN,
+    POST_CHANGE_PLAN,
     "scripts/check-baseline.py",
     "test_spoof_mac_address.py",
 ]
@@ -118,6 +120,8 @@ def main():
         "timeout=COMMAND_TIMEOUT_SECONDS",
         "except subprocess.TimeoutExpired",
         "failed with exit status",
+        "if new_address != checked_address:",
+        "interface did not adopt requested MAC address",
         ") from None",
     ]:
         if phrase not in script:
@@ -126,6 +130,20 @@ def main():
         failures.append("SpoofMACAddress.py must not use raw Popen")
     if "shell=True" in script:
         failures.append("SpoofMACAddress.py must not execute through a shell")
+    set_source = script[script.find("def set_mac_address"):script.find("def build_parser")]
+    set_markers = [
+        "new_address = get_mac_address(checked_interface)",
+        "if new_address != checked_address:",
+        "hardware_address = get_mac_address(checked_interface, hardware=True)",
+        '"Changed {} (h/w: {}) from {} to {}."',
+    ]
+    if any(marker not in set_source for marker in set_markers) or not all(
+        set_source.find(left) < set_source.find(right)
+        for left, right in zip(set_markers, set_markers[1:])
+    ):
+        failures.append(
+            "post-change equality verification must precede hardware lookup and success output"
+        )
 
     wrapper = read("SpoofMACAddress")
     for phrase in [
@@ -143,6 +161,9 @@ def main():
         "test_normalize_observed_mac_address_accepts_hardware_addresses",
         "test_validate_interface_rejects_shell_metacharacters",
         "test_set_mac_address_dry_run_does_not_read_current_address",
+        "test_set_mac_address_rejects_post_change_mismatch_without_identifiers",
+        "self.assertEqual(4, execute.call_count)",
+        "get_mac_address.call_args_list",
         "00:00:00:00:00:00",
         "01:23:45:67:89:ab",
         "00:23:45:67:89:ab",
@@ -160,6 +181,16 @@ def main():
     ]:
         if phrase not in tests:
             failures.append(f"tests must include {phrase}")
+
+    post_change_docs = {
+        "README.md": "success is reported only after the observed interface address matches",
+        "SECURITY.md": "Post-change verification should require the observed address to match",
+        "VISION.md": "observed post-command address to match the requested target",
+        "CHANGES.md": "Verify the observed post-command interface address matches",
+    }
+    for path, phrase in post_change_docs.items():
+        if phrase not in " ".join(read(path).split()):
+            failures.append(f"{path} must include {phrase}")
 
     makefile = read("Makefile")
     for phrase in [
@@ -388,6 +419,37 @@ def main():
     ]:
         if evidence not in restoration_verification:
             failures.append(f"hardware restoration verification must record {evidence}")
+
+    post_change_plan = read(POST_CHANGE_PLAN)
+    post_change_status = re.findall(r"(?mi)^status:\s*(.+?)\s*$", post_change_plan)
+    post_change_work = markdown_section(post_change_plan, "Work Completed")
+    post_change_verification = markdown_section(
+        post_change_plan, "Verification Completed"
+    )
+    if post_change_status != ["completed"] or not post_change_work:
+        failures.append(
+            "post-change verification plan must record completed status and work"
+        )
+    if not post_change_verification or re.search(
+        r"(?i)\b(?:pending|todo|tbd|not run)\b", post_change_verification
+    ):
+        failures.append("post-change verification plan must record completed verification")
+    for evidence in [
+        "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest -v test_spoof_mac_address.py",
+        "make lint",
+        "make test",
+        "make build",
+        "make verify",
+        "make check",
+        "external working directory",
+        "workflow YAML",
+        "StartupParameters.plist",
+        "hostile mutations",
+        "git diff --check",
+        "secret and generated-artifact scan",
+    ]:
+        if evidence not in post_change_verification:
+            failures.append(f"post-change verification must record {evidence}")
 
     guidance = " ".join(
         "\n".join(read(path) for path in ["README.md", "SECURITY.md", "VISION.md", "CHANGES.md"]).split()
