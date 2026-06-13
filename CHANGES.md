@@ -1,5 +1,11 @@
 # Changes
 
+## 2026-06-13
+
+- Added an explicit hardware-address restoration runbook covering private
+  pre-change capture, dry-run review, direct restoration, state/connectivity
+  verification, failure escalation, and anti-persistence boundaries.
+
 ## 2026-06-12
 
 - Disabled persisted checkout credentials and enforced the sole pinned

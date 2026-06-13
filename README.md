@@ -88,6 +88,11 @@ without repeating command arguments or captured output.
 Observed current and hardware addresses from `ifconfig` and `networksetup` are
 normalized separately because real hardware addresses are commonly globally
 administered.
+Before a live change, follow
+[`docs/hardware-address-restoration.md`](docs/hardware-address-restoration.md)
+to capture the authorized interface and hardware address privately, review the
+dry-run command sequence, restore only the recorded address, and verify current
+state, connectivity, and network policy afterward.
 
 The legacy `SpoofMACAddress` startup wrapper runs dry-run mode by default.
 Set `SPOOF_MAC_ADDRESS_APPLY=1` only when startup-time address changes are
@@ -145,6 +150,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
   the current modernization baseline.
 - See `docs/plans/2026-06-09-make-gate-aliases.md` for the local Make gate
   aliases.
+- See `docs/hardware-address-restoration.md` for the explicit pre-change and
+  restoration runbook.
 - See `VISION.md` for project direction and contribution guardrails.
 
 ## Contributing
