@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-14
+
+- Made every standard Make gate resolve mocked tests, source compilation,
+  shell syntax, and checker paths from the repository root.
+
 ## 2026-06-13
 
 - Verify the observed post-command interface address matches the requested

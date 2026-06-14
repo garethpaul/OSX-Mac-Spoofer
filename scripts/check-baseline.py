@@ -18,6 +18,7 @@ COMMAND_FAILURE_PLAN = "docs/plans/2026-06-12-command-failure-output-sanitizatio
 CHECKOUT_CREDENTIAL_PLAN = "docs/plans/2026-06-12-checkout-credential-boundary.md"
 RESTORATION_PLAN = "docs/plans/2026-06-13-hardware-address-restoration.md"
 POST_CHANGE_PLAN = "docs/plans/2026-06-13-post-change-address-verification.md"
+LOCATION_INDEPENDENT_MAKE_PLAN = "docs/plans/2026-06-14-location-independent-make-gates.md"
 REQUIRED = [
     ".github/workflows/check.yml",
     ".gitignore",
@@ -48,6 +49,7 @@ REQUIRED = [
     CHECKOUT_CREDENTIAL_PLAN,
     RESTORATION_PLAN,
     POST_CHANGE_PLAN,
+    LOCATION_INDEPENDENT_MAKE_PLAN,
     "scripts/check-baseline.py",
     "test_spoof_mac_address.py",
 ]
@@ -191,14 +193,22 @@ def main():
     for path, phrase in post_change_docs.items():
         if phrase not in " ".join(read(path).split()):
             failures.append(f"{path} must include {phrase}")
+    changes = " ".join(read("CHANGES.md").split())
+    if "source compilation, shell syntax, and checker paths" not in changes:
+        failures.append(
+            "CHANGES.md must record rooted source, shell, and checker paths"
+        )
 
     makefile = read("Makefile")
     for phrase in [
         "PYTHON ?= python3",
-        "PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -v",
-        "compile(pathlib.Path(path).read_text(), path, 'exec')",
-        "sh -n SpoofMACAddress",
-        "PYTHONDONTWRITEBYTECODE=1 $(PYTHON) scripts/check-baseline.py",
+        "override REPO_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))",
+        'PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -v -s "$(REPO_ROOT)"',
+        'REPO_ROOT="$(REPO_ROOT)" PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -c',
+        "root = pathlib.Path(os.environ['REPO_ROOT'])",
+        "compile((root / path).read_text(), path, 'exec')",
+        'sh -n "$(REPO_ROOT)/SpoofMACAddress"',
+        'PYTHONDONTWRITEBYTECODE=1 $(PYTHON) "$(REPO_ROOT)/scripts/check-baseline.py"',
         "verify: check",
         "build: test",
         "lint: static-check",
@@ -273,6 +283,7 @@ def main():
         "bounded command timeout",
         "captured output",
         "exit status",
+        "absolute path works externally",
     ]:
         if phrase.lower() not in docs.lower():
             failures.append(f"docs must mention {phrase}")
@@ -451,6 +462,48 @@ def main():
         if evidence not in post_change_verification:
             failures.append(f"post-change verification must record {evidence}")
 
+    location_make_plan = read(LOCATION_INDEPENDENT_MAKE_PLAN)
+    location_make_status = re.findall(
+        r"(?mi)^status:\s*(.+?)\s*$", location_make_plan
+    )
+    location_make_work = markdown_section(location_make_plan, "Work Completed")
+    location_make_verification = markdown_section(
+        location_make_plan, "Verification Completed"
+    )
+    if location_make_status != ["completed"] or not location_make_work:
+        failures.append(
+            "location-independent Make plan must record one completed status "
+            "and completed work"
+        )
+    if not location_make_verification or re.search(
+        r"(?i)\b(?:pending|todo|tbd|not run)\b", location_make_verification
+    ):
+        failures.append(
+            "location-independent Make plan must record completed verification"
+        )
+    for evidence in [
+        "make lint",
+        "make test",
+        "make build",
+        "make verify",
+        "make check",
+        "make static-check",
+        "16 mocked, non-privileged tests",
+        "from `/tmp`",
+        "absolute",
+        "caller-supplied `REPO_ROOT=/tmp`",
+        "caller-relative `PYTHON=./osx-mac-python`",
+        "Python source compilation",
+        "workflow YAML parsing",
+        "rooted shell syntax",
+        "StartupParameters.plist",
+        "Thirteen isolated hostile mutations were rejected",
+    ]:
+        if evidence not in location_make_verification:
+            failures.append(
+                f"location-independent Make verification must record {evidence}"
+            )
+
     guidance = " ".join(
         "\n".join(read(path) for path in ["README.md", "SECURITY.md", "VISION.md", "CHANGES.md"]).split()
     ).lower()
@@ -459,6 +512,10 @@ def main():
         or "credential-free checkout" not in guidance
     ):
         failures.append("repository guidance must document the credential-free checkout boundary")
+    if "source compilation, shell syntax, and checker paths" not in guidance:
+        failures.append(
+            "repository guidance must document rooted Make path resolution"
+        )
 
     try:
         ET.parse(ROOT / "docs/readme-overview.svg")

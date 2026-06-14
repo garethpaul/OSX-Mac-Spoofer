@@ -147,6 +147,8 @@ When the required SDK or runtime is unavailable, use static checks and source re
 
 ## Maintenance Notes
 
+- Standard Make aliases resolve mocked tests, source compilation, shell syntax,
+  and checker paths from `Makefile`, so its absolute path works externally.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `CHANGES.md` and `docs/plans/2026-06-08-mac-spoofer-baseline.md` for
   the current modernization baseline.
