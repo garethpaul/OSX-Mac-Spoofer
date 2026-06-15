@@ -279,6 +279,38 @@ class SpoofMacAddressTest(unittest.TestCase):
         self.assertIsNone(raised.exception.__cause__)
         self.assertTrue(raised.exception.__suppress_context__)
 
+    def test_set_mac_address_reports_partial_state_when_mutation_command_fails(self):
+        failure = RuntimeError("ifconfig failed for en0 with secret output")
+        with mock.patch.object(
+            spoof,
+            "execute",
+            side_effect=[None, None, failure],
+        ) as execute:
+            with mock.patch.object(
+                spoof,
+                "get_mac_address",
+                side_effect=["00:23:45:67:89:ab", "00:11:22:33:44:55"],
+            ) as get_mac_address:
+                with self.assertRaisesRegex(
+                    RuntimeError,
+                    "network command failed after interface address mutation",
+                ) as raised:
+                    spoof.set_mac_address("en0", "02:23:45:67:89:ab")
+
+        self.assertEqual(3, execute.call_count)
+        self.assertEqual(2, get_mac_address.call_count)
+        message = str(raised.exception)
+        for sensitive_value in [
+            "en0",
+            "02:23:45:67:89:ab",
+            "secret output",
+            "exit status",
+        ]:
+            self.assertNotIn(sensitive_value, message)
+        self.assertIn("inspect and restore state manually", message)
+        self.assertIsNone(raised.exception.__cause__)
+        self.assertTrue(raised.exception.__suppress_context__)
+
     def test_resolve_target_defaults_and_manual_values(self):
         args = argparse.Namespace(
             interface=None,

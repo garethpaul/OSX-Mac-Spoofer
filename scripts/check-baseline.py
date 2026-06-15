@@ -21,6 +21,7 @@ POST_CHANGE_PLAN = "docs/plans/2026-06-13-post-change-address-verification.md"
 LOCATION_INDEPENDENT_MAKE_PLAN = "docs/plans/2026-06-14-location-independent-make-gates.md"
 PRE_CHANGE_HARDWARE_PLAN = "docs/plans/2026-06-15-pre-change-hardware-capture.md"
 PARTIAL_MUTATION_PLAN = "docs/plans/2026-06-15-partial-mutation-error-boundary.md"
+MUTATION_COMMAND_ERROR_PLAN = "docs/plans/2026-06-15-mutation-command-error-boundary.md"
 REQUIRED = [
     ".github/workflows/check.yml",
     ".gitignore",
@@ -54,6 +55,7 @@ REQUIRED = [
     LOCATION_INDEPENDENT_MAKE_PLAN,
     PRE_CHANGE_HARDWARE_PLAN,
     PARTIAL_MUTATION_PLAN,
+    MUTATION_COMMAND_ERROR_PLAN,
     "scripts/check-baseline.py",
     "test_spoof_mac_address.py",
 ]
@@ -130,7 +132,7 @@ def main():
         "interface did not adopt requested MAC address",
         'address_command = ["ifconfig", checked_interface, "ether", checked_address]',
         "address_changed = False",
-        "if address_changed:",
+        "if address_changed or command == address_command:",
         "network command failed after interface address mutation",
         "inspect and restore state manually",
         ") from None",
@@ -148,7 +150,7 @@ def main():
         'address_command = ["ifconfig", checked_interface, "ether", checked_address]',
         "address_changed = False",
         "    for command in commands:\n        try:\n            execute(command)",
-        "            if address_changed:",
+        "            if address_changed or command == address_command:",
         "        if command == address_command:",
         "            address_changed = True",
         "new_address = get_mac_address(checked_interface)",
@@ -184,9 +186,11 @@ def main():
         "test_set_mac_address_hardware_lookup_failure_prevents_mutation",
         "test_set_mac_address_preserves_failure_before_address_mutation",
         "test_set_mac_address_reports_partial_state_after_address_mutation",
+        "test_set_mac_address_reports_partial_state_when_mutation_command_fails",
         '["current", "hardware", "execute", "execute", "execute", "execute", "current"]',
         "execute.assert_not_called()",
         "self.assertEqual(4, execute.call_count)",
+        "self.assertEqual(3, execute.call_count)",
         "get_mac_address.call_args_list",
         "self.assertIs(failure, raised.exception)",
         "inspect and restore state manually",
@@ -233,6 +237,15 @@ def main():
         "CHANGES.md": "Report later command failures as an identifier-free partial mutation state",
     }
     for path, phrase in partial_state_docs.items():
+        if phrase not in " ".join(read(path).split()):
+            failures.append(f"{path} must include {phrase}")
+    mutation_command_docs = {
+        "README.md": "A failure from the address mutation command itself is also treated as a possible partial state",
+        "SECURITY.md": "Failure of the address mutation command itself should be treated as a possible partial state",
+        "VISION.md": "Treat address mutation command failures as possible partial state",
+        "CHANGES.md": "Treat failure of the address mutation command itself as a possible partial state",
+    }
+    for path, phrase in mutation_command_docs.items():
         if phrase not in " ".join(read(path).split()):
             failures.append(f"{path} must include {phrase}")
     changes = " ".join(read("CHANGES.md").split())
@@ -611,6 +624,40 @@ def main():
         if evidence not in partial_mutation_verification:
             failures.append(
                 f"partial mutation error verification must record {evidence}"
+            )
+
+    mutation_command_plan = read(MUTATION_COMMAND_ERROR_PLAN)
+    mutation_command_status = re.findall(
+        r"(?mi)^status:\s*(.+?)\s*$", mutation_command_plan
+    )
+    mutation_command_work = markdown_section(
+        mutation_command_plan, "Work Completed"
+    )
+    mutation_command_verification = markdown_section(
+        mutation_command_plan, "Verification Completed"
+    )
+    if (mutation_command_status != ["completed"] or not mutation_command_work or
+            not mutation_command_verification or re.search(
+                r"(?i)\b(?:pending|todo|tbd|not run|to be recorded)\b",
+                mutation_command_verification,
+            )):
+        failures.append(
+            "mutation command error plan must record completed verification"
+        )
+    for evidence in [
+        "21 mocked, non-privileged unit tests",
+        "make lint",
+        "make test",
+        "make build",
+        "make verify",
+        "make check",
+        "external working directory",
+        "Five isolated hostile mutations",
+        "git diff --check",
+    ]:
+        if evidence not in mutation_command_verification:
+            failures.append(
+                f"mutation command error verification must record {evidence}"
             )
 
     guidance = " ".join(

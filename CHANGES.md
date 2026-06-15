@@ -6,6 +6,8 @@
   lookup failure cannot follow an already-applied network change.
 - Report later command failures as an identifier-free partial mutation state
   requiring manual inspection and restoration.
+- Treat failure of the address mutation command itself as a possible partial
+  state because an error may follow an already-applied network change.
 
 ## 2026-06-14
 

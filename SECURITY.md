@@ -63,6 +63,9 @@ Helpful reports include:
 - Failures after the address mutation should report a sanitized partial state,
   require manual inspection and restoration, and never trigger automatic
   rollback or expose interface and address identifiers.
+- Failure of the address mutation command itself should be treated as a possible
+  partial state because an error does not prove the operating system left the
+  interface unchanged.
 - Python bytecode is local tooling output and should not remain after
   verification gates.
 - Pinned, read-only hosted Linux validation runs only mocked command tests and

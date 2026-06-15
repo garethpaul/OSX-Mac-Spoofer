@@ -187,7 +187,7 @@ def set_mac_address(
         try:
             execute(command)
         except RuntimeError:
-            if address_changed:
+            if address_changed or command == address_command:
                 raise RuntimeError(
                     "network command failed after interface address mutation; "
                     "inspect and restore state manually"
