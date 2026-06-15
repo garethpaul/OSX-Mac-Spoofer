@@ -1,6 +1,6 @@
 # Partial Mutation Error Boundary
 
-status: planned
+status: completed
 
 ## Summary
 
@@ -54,3 +54,26 @@ verification and restoration decision.
 - Real privileged macOS networking commands remain outside Linux-hosted tests.
 - The change must remain stacked on PR #9 and must not be merged or closed
   without explicit owner authorization.
+
+## Work Completed
+
+- Tracked successful completion of the exact interface address command inside
+  the existing live command loop.
+- Preserved original failures before mutation and translated later failures to
+  an identifier-free partial-state error with exception chaining suppressed.
+- Added mocked pre/post-boundary regressions, ordering contracts, and operator,
+  security, vision, and change-history guidance without automatic rollback.
+
+## Verification Completed
+
+- All 20 mocked, non-privileged unit tests passed.
+- `make lint`, `make test`, `make build`, `make verify`, `make check`, and the
+  external working directory gate passed.
+- Python source compilation, shell syntax, workflow YAML, legacy plist, and XML
+  documentation checks passed without invoking macOS networking commands.
+- Six isolated hostile mutations removing mutation tracking, marking state too
+  early, removing translation, leaking identifiers, deleting guidance, or
+  reverting completed plan status were rejected.
+- `git diff --check`, exact-diff, generated-artifact, conflict-marker,
+  intended-path, binary/large-file, changed-line credential, and captured
+  identifier audits passed.

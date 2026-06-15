@@ -89,6 +89,9 @@ Live success is reported only after the observed interface address matches the
 validated target; mismatch errors omit the interface and both MAC addresses.
 The live path reads the current and hardware addresses before mutation commands
 begin, so an inspection failure cannot be reported after network state changed.
+If a later command fails after the address mutation succeeds, the utility
+reports a sanitized partial-state error and requires manual inspection and
+restoration instead of claiming the operation failed before state changed.
 Observed current and hardware addresses from `ifconfig` and `networksetup` are
 normalized separately because real hardware addresses are commonly globally
 administered.

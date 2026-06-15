@@ -43,6 +43,8 @@ Priority:
 - Require the observed post-command address to match the requested target
   before reporting success
 - Capture current and hardware addresses before mutation commands begin
+- Surface post-mutation command failures as sanitized partial state requiring
+  manual inspection and restoration
 - Keep verification targets from leaving Python bytecode behind
 - Keep Python 3.10 and 3.12 hosted Linux validation mocked and non-privileged
 - Keep hosted source retrieval credential-free after checkout

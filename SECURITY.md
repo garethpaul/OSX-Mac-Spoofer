@@ -60,6 +60,9 @@ Helpful reports include:
   requested target and report mismatches without interface or MAC identifiers.
 - Current and hardware address lookup should complete before mutation commands
   begin so an inspection failure cannot create an ambiguous partial success.
+- Failures after the address mutation should report a sanitized partial state,
+  require manual inspection and restoration, and never trigger automatic
+  rollback or expose interface and address identifiers.
 - Python bytecode is local tooling output and should not remain after
   verification gates.
 - Pinned, read-only hosted Linux validation runs only mocked command tests and

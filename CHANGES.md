@@ -4,6 +4,8 @@
 
 - Capture current and hardware addresses before mutation commands begin so a
   lookup failure cannot follow an already-applied network change.
+- Report later command failures as an identifier-free partial mutation state
+  requiring manual inspection and restoration.
 
 ## 2026-06-14
 

@@ -181,8 +181,20 @@ def set_mac_address(
     old_address = get_mac_address(checked_interface)
     hardware_address = get_mac_address(checked_interface, hardware=True)
 
+    address_command = ["ifconfig", checked_interface, "ether", checked_address]
+    address_changed = False
     for command in commands:
-        execute(command)
+        try:
+            execute(command)
+        except RuntimeError:
+            if address_changed:
+                raise RuntimeError(
+                    "network command failed after interface address mutation; "
+                    "inspect and restore state manually"
+                ) from None
+            raise
+        if command == address_command:
+            address_changed = True
 
     new_address = get_mac_address(checked_interface)
     if new_address != checked_address:
