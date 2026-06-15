@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-15
+
+- Capture current and hardware addresses before mutation commands begin so a
+  lookup failure cannot follow an already-applied network change.
+
 ## 2026-06-14
 
 - Made every standard Make gate resolve mocked tests, source compilation,

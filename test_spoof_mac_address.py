@@ -167,7 +167,11 @@ class SpoofMacAddressTest(unittest.TestCase):
             with mock.patch.object(
                 spoof,
                 "get_mac_address",
-                side_effect=["00:23:45:67:89:ab", "02:aa:bb:cc:dd:ee"],
+                side_effect=[
+                    "00:23:45:67:89:ab",
+                    "00:11:22:33:44:55",
+                    "02:aa:bb:cc:dd:ee",
+                ],
             ) as get_mac_address:
                 with self.assertRaisesRegex(
                     RuntimeError, "interface did not adopt requested MAC address"
@@ -176,13 +180,57 @@ class SpoofMacAddressTest(unittest.TestCase):
 
         self.assertEqual(4, execute.call_count)
         self.assertEqual(
-            [mock.call("en0"), mock.call("en0")],
+            [
+                mock.call("en0"),
+                mock.call("en0", hardware=True),
+                mock.call("en0"),
+            ],
             get_mac_address.call_args_list,
         )
         message = str(raised.exception)
         self.assertNotIn("en0", message)
         self.assertNotIn("02:23:45:67:89:ab", message)
         self.assertNotIn("02:aa:bb:cc:dd:ee", message)
+
+    def test_set_mac_address_captures_hardware_before_mutation(self):
+        events = []
+        observed_addresses = iter(
+            ["00:23:45:67:89:ab", "00:11:22:33:44:55", "02:23:45:67:89:ab"]
+        )
+
+        def get_mac_address(interface, *, hardware=False):
+            events.append("hardware" if hardware else "current")
+            return next(observed_addresses)
+
+        def execute(command):
+            events.append("execute")
+
+        output = io.StringIO()
+        with mock.patch.object(spoof, "get_mac_address", side_effect=get_mac_address):
+            with mock.patch.object(spoof, "execute", side_effect=execute):
+                with redirect_stdout(output):
+                    spoof.set_mac_address("en0", "02:23:45:67:89:ab")
+
+        self.assertEqual(
+            ["current", "hardware", "execute", "execute", "execute", "execute", "current"],
+            events,
+        )
+        self.assertIn("Changed en0", output.getvalue())
+
+    def test_set_mac_address_hardware_lookup_failure_prevents_mutation(self):
+        with mock.patch.object(spoof, "execute") as execute:
+            with mock.patch.object(
+                spoof,
+                "get_mac_address",
+                side_effect=[
+                    "00:23:45:67:89:ab",
+                    RuntimeError("networksetup failed with exit status 1"),
+                ],
+            ):
+                with self.assertRaisesRegex(RuntimeError, "networksetup failed"):
+                    spoof.set_mac_address("en0", "02:23:45:67:89:ab")
+
+        execute.assert_not_called()
 
     def test_resolve_target_defaults_and_manual_values(self):
         args = argparse.Namespace(

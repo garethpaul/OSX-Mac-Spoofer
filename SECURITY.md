@@ -58,6 +58,8 @@ Helpful reports include:
   host-specific details and should not be repeated.
 - Post-change verification should require the observed address to match the
   requested target and report mismatches without interface or MAC identifiers.
+- Current and hardware address lookup should complete before mutation commands
+  begin so an inspection failure cannot create an ambiguous partial success.
 - Python bytecode is local tooling output and should not remain after
   verification gates.
 - Pinned, read-only hosted Linux validation runs only mocked command tests and

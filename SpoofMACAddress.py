@@ -179,6 +179,7 @@ def set_mac_address(
         return
 
     old_address = get_mac_address(checked_interface)
+    hardware_address = get_mac_address(checked_interface, hardware=True)
 
     for command in commands:
         execute(command)
@@ -186,7 +187,6 @@ def set_mac_address(
     new_address = get_mac_address(checked_interface)
     if new_address != checked_address:
         raise RuntimeError("interface did not adopt requested MAC address")
-    hardware_address = get_mac_address(checked_interface, hardware=True)
     print(
         "Changed {} (h/w: {}) from {} to {}.".format(
             checked_interface, hardware_address, old_address, new_address

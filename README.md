@@ -87,6 +87,8 @@ Nonzero command failures likewise report only the executable and exit status,
 without repeating command arguments or captured output.
 Live success is reported only after the observed interface address matches the
 validated target; mismatch errors omit the interface and both MAC addresses.
+The live path reads the current and hardware addresses before mutation commands
+begin, so an inspection failure cannot be reported after network state changed.
 Observed current and hardware addresses from `ifconfig` and `networksetup` are
 normalized separately because real hardware addresses are commonly globally
 administered.

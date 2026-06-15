@@ -1,6 +1,6 @@
 # Pre-Change Hardware Address Capture
 
-status: planned
+status: completed
 
 ## Context
 
@@ -37,3 +37,27 @@ state mutation.
   contract, and completed plan evidence.
 - Audit the intended diff, secrets, captured identifiers, and generated
   artifacts before committing.
+
+## Work Completed
+
+- Moved the normalized hardware-address lookup beside the current-address
+  lookup before the live mutation loop.
+- Added mocked success-order and lookup-failure tests that prove no mutation
+  command starts until both pre-change reads succeed.
+- Extended the baseline checker and maintained operator, security, vision, and
+  change-history documentation with the fail-closed ordering contract.
+
+## Verification Completed
+
+- The focused suite and every standard Make alias passed with 18 mocked, non-privileged tests.
+- `make lint`, `make test`, `make build`, `make verify`, and `make check` passed
+  from the repository root.
+- The complete `make check` gate passed from an external working directory
+  through the repository's absolute Makefile path.
+- Focused hostile mutations to live lookup ordering, the no-mutation failure
+  assertion, static test contract, documentation, and completed plan evidence
+  were rejected.
+- Python source compilation, shell syntax, workflow YAML, the legacy plist,
+  and XML documentation parsing passed without invoking platform commands.
+- `git diff --check` and the intended-path secret and generated-artifact scan
+  passed.

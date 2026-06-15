@@ -42,6 +42,7 @@ Priority:
 - Keep nonzero command errors free of captured output and command arguments
 - Require the observed post-command address to match the requested target
   before reporting success
+- Capture current and hardware addresses before mutation commands begin
 - Keep verification targets from leaving Python bytecode behind
 - Keep Python 3.10 and 3.12 hosted Linux validation mocked and non-privileged
 - Keep hosted source retrieval credential-free after checkout

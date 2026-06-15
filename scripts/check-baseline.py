@@ -19,6 +19,7 @@ CHECKOUT_CREDENTIAL_PLAN = "docs/plans/2026-06-12-checkout-credential-boundary.m
 RESTORATION_PLAN = "docs/plans/2026-06-13-hardware-address-restoration.md"
 POST_CHANGE_PLAN = "docs/plans/2026-06-13-post-change-address-verification.md"
 LOCATION_INDEPENDENT_MAKE_PLAN = "docs/plans/2026-06-14-location-independent-make-gates.md"
+PRE_CHANGE_HARDWARE_PLAN = "docs/plans/2026-06-15-pre-change-hardware-capture.md"
 REQUIRED = [
     ".github/workflows/check.yml",
     ".gitignore",
@@ -50,6 +51,7 @@ REQUIRED = [
     RESTORATION_PLAN,
     POST_CHANGE_PLAN,
     LOCATION_INDEPENDENT_MAKE_PLAN,
+    PRE_CHANGE_HARDWARE_PLAN,
     "scripts/check-baseline.py",
     "test_spoof_mac_address.py",
 ]
@@ -134,9 +136,11 @@ def main():
         failures.append("SpoofMACAddress.py must not execute through a shell")
     set_source = script[script.find("def set_mac_address"):script.find("def build_parser")]
     set_markers = [
+        "old_address = get_mac_address(checked_interface)",
+        "hardware_address = get_mac_address(checked_interface, hardware=True)",
+        "    for command in commands:\n        execute(command)",
         "new_address = get_mac_address(checked_interface)",
         "if new_address != checked_address:",
-        "hardware_address = get_mac_address(checked_interface, hardware=True)",
         '"Changed {} (h/w: {}) from {} to {}."',
     ]
     if any(marker not in set_source for marker in set_markers) or not all(
@@ -144,7 +148,7 @@ def main():
         for left, right in zip(set_markers, set_markers[1:])
     ):
         failures.append(
-            "post-change equality verification must precede hardware lookup and success output"
+            "current and hardware lookup must precede mutation and post-change verification"
         )
 
     wrapper = read("SpoofMACAddress")
@@ -164,6 +168,10 @@ def main():
         "test_validate_interface_rejects_shell_metacharacters",
         "test_set_mac_address_dry_run_does_not_read_current_address",
         "test_set_mac_address_rejects_post_change_mismatch_without_identifiers",
+        "test_set_mac_address_captures_hardware_before_mutation",
+        "test_set_mac_address_hardware_lookup_failure_prevents_mutation",
+        '["current", "hardware", "execute", "execute", "execute", "execute", "current"]',
+        "execute.assert_not_called()",
         "self.assertEqual(4, execute.call_count)",
         "get_mac_address.call_args_list",
         "00:00:00:00:00:00",
@@ -191,6 +199,15 @@ def main():
         "CHANGES.md": "Verify the observed post-command interface address matches",
     }
     for path, phrase in post_change_docs.items():
+        if phrase not in " ".join(read(path).split()):
+            failures.append(f"{path} must include {phrase}")
+    pre_change_docs = {
+        "README.md": "reads the current and hardware addresses before mutation commands begin",
+        "SECURITY.md": "Current and hardware address lookup should complete before mutation commands begin",
+        "VISION.md": "Capture current and hardware addresses before mutation commands begin",
+        "CHANGES.md": "Capture current and hardware addresses before mutation commands begin",
+    }
+    for path, phrase in pre_change_docs.items():
         if phrase not in " ".join(read(path).split()):
             failures.append(f"{path} must include {phrase}")
     changes = " ".join(read("CHANGES.md").split())
@@ -502,6 +519,39 @@ def main():
         if evidence not in location_make_verification:
             failures.append(
                 f"location-independent Make verification must record {evidence}"
+            )
+
+    pre_change_plan = read(PRE_CHANGE_HARDWARE_PLAN)
+    pre_change_status = re.findall(r"(?mi)^status:\s*(.+?)\s*$", pre_change_plan)
+    pre_change_work = markdown_section(pre_change_plan, "Work Completed")
+    pre_change_verification = markdown_section(
+        pre_change_plan, "Verification Completed"
+    )
+    if pre_change_status != ["completed"] or not pre_change_work:
+        failures.append(
+            "pre-change hardware capture plan must record completed status and work"
+        )
+    if not pre_change_verification or re.search(
+        r"(?i)\b(?:pending|todo|tbd|not run)\b", pre_change_verification
+    ):
+        failures.append(
+            "pre-change hardware capture plan must record completed verification"
+        )
+    for evidence in [
+        "18 mocked, non-privileged tests",
+        "make lint",
+        "make test",
+        "make build",
+        "make verify",
+        "make check",
+        "external working directory",
+        "hostile mutations",
+        "git diff --check",
+        "secret and generated-artifact scan",
+    ]:
+        if evidence not in pre_change_verification:
+            failures.append(
+                f"pre-change hardware capture verification must record {evidence}"
             )
 
     guidance = " ".join(
