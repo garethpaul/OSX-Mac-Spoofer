@@ -22,6 +22,7 @@ LOCATION_INDEPENDENT_MAKE_PLAN = "docs/plans/2026-06-14-location-independent-mak
 PRE_CHANGE_HARDWARE_PLAN = "docs/plans/2026-06-15-pre-change-hardware-capture.md"
 PARTIAL_MUTATION_PLAN = "docs/plans/2026-06-15-partial-mutation-error-boundary.md"
 MUTATION_COMMAND_ERROR_PLAN = "docs/plans/2026-06-15-mutation-command-error-boundary.md"
+POST_MUTATION_VERIFICATION_ERROR_PLAN = "docs/plans/2026-06-15-post-mutation-verification-error.md"
 REQUIRED = [
     ".github/workflows/check.yml",
     ".gitignore",
@@ -56,6 +57,7 @@ REQUIRED = [
     PRE_CHANGE_HARDWARE_PLAN,
     PARTIAL_MUTATION_PLAN,
     MUTATION_COMMAND_ERROR_PLAN,
+    POST_MUTATION_VERIFICATION_ERROR_PLAN,
     "scripts/check-baseline.py",
     "test_spoof_mac_address.py",
 ]
@@ -154,6 +156,7 @@ def main():
         "        if command == address_command:",
         "            address_changed = True",
         "new_address = get_mac_address(checked_interface)",
+        "    except (RuntimeError, ValueError):\n        raise RuntimeError(\n            \"network command failed after interface address mutation; \"",
         "if new_address != checked_address:",
         '"Changed {} (h/w: {}) from {} to {}."',
     ]
@@ -163,6 +166,17 @@ def main():
     ):
         failures.append(
             "current and hardware lookup must precede mutation and post-change verification"
+        )
+    verification_lookup_boundary = '''try:
+        new_address = get_mac_address(checked_interface)
+    except (RuntimeError, ValueError):
+        raise RuntimeError(
+            "network command failed after interface address mutation; "
+            "inspect and restore state manually"
+        ) from None'''
+    if verification_lookup_boundary not in set_source:
+        failures.append(
+            "post-mutation verification lookup must use the sanitized partial-state boundary"
         )
 
     wrapper = read("SpoofMACAddress")
@@ -187,10 +201,13 @@ def main():
         "test_set_mac_address_preserves_failure_before_address_mutation",
         "test_set_mac_address_reports_partial_state_after_address_mutation",
         "test_set_mac_address_reports_partial_state_when_mutation_command_fails",
+        "test_set_mac_address_reports_partial_state_when_verification_lookup_fails",
+        "test_set_mac_address_reports_partial_state_when_verification_output_is_invalid",
         '["current", "hardware", "execute", "execute", "execute", "execute", "current"]',
         "execute.assert_not_called()",
         "self.assertEqual(4, execute.call_count)",
         "self.assertEqual(3, execute.call_count)",
+        "self.assertEqual(3, get_mac_address.call_count)",
         "get_mac_address.call_args_list",
         "self.assertIs(failure, raised.exception)",
         "inspect and restore state manually",
@@ -246,6 +263,15 @@ def main():
         "CHANGES.md": "Treat failure of the address mutation command itself as a possible partial state",
     }
     for path, phrase in mutation_command_docs.items():
+        if phrase not in " ".join(read(path).split()):
+            failures.append(f"{path} must include {phrase}")
+    verification_error_docs = {
+        "README.md": "Failure of the final verification lookup is likewise reported as sanitized partial state",
+        "SECURITY.md": "Failure of the final verification lookup should report sanitized partial state",
+        "VISION.md": "Treat final verification lookup failures as sanitized partial state",
+        "CHANGES.md": "Report final verification lookup failures as identifier-free partial state",
+    }
+    for path, phrase in verification_error_docs.items():
         if phrase not in " ".join(read(path).split()):
             failures.append(f"{path} must include {phrase}")
     changes = " ".join(read("CHANGES.md").split())
@@ -658,6 +684,40 @@ def main():
         if evidence not in mutation_command_verification:
             failures.append(
                 f"mutation command error verification must record {evidence}"
+            )
+
+    verification_error_plan = read(POST_MUTATION_VERIFICATION_ERROR_PLAN)
+    verification_error_status = re.findall(
+        r"(?mi)^status:\s*(.+?)\s*$", verification_error_plan
+    )
+    verification_error_work = markdown_section(
+        verification_error_plan, "Work Completed"
+    )
+    verification_error_verification = markdown_section(
+        verification_error_plan, "Verification Completed"
+    )
+    if (verification_error_status != ["completed"] or not verification_error_work or
+            not verification_error_verification or re.search(
+                r"(?i)\b(?:pending|todo|tbd|not run|to be recorded)\b",
+                verification_error_verification,
+            )):
+        failures.append(
+            "post-mutation verification error plan must record completed verification"
+        )
+    for evidence in [
+        "mocked, non-privileged unit tests",
+        "make lint",
+        "make test",
+        "make build",
+        "make verify",
+        "make check",
+        "external working directory",
+        "isolated hostile mutations",
+        "git diff --check",
+    ]:
+        if evidence not in verification_error_verification:
+            failures.append(
+                f"post-mutation verification error verification must record {evidence}"
             )
 
     guidance = " ".join(

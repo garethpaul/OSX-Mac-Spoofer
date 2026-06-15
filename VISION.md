@@ -47,6 +47,7 @@ Priority:
   manual inspection and restoration
 - Treat address mutation command failures as possible partial state rather than
   proof that the interface remained unchanged
+- Treat final verification lookup failures as sanitized partial state
 - Keep verification targets from leaving Python bytecode behind
 - Keep Python 3.10 and 3.12 hosted Linux validation mocked and non-privileged
 - Keep hosted source retrieval credential-free after checkout

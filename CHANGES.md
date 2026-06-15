@@ -8,6 +8,8 @@
   requiring manual inspection and restoration.
 - Treat failure of the address mutation command itself as a possible partial
   state because an error may follow an already-applied network change.
+- Report final verification lookup failures as identifier-free partial state
+  requiring manual inspection and restoration.
 
 ## 2026-06-14
 

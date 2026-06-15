@@ -1,6 +1,6 @@
 # Post-Mutation Verification Error Boundary
 
-status: planned
+status: completed
 
 ## Context
 
@@ -16,8 +16,8 @@ that requires manual inspection and restoration.
 
 ## Scope
 
-- Route a `RuntimeError` from the final current-address lookup through the
-  existing partial-state message.
+- Route execution and output-validation errors from the final current-address
+  lookup through the existing partial-state message.
 - Suppress the original exception context so interface names, target addresses,
   and command output do not escape.
 - Preserve pre-mutation lookup failures, mutation-command boundaries, the
@@ -31,8 +31,8 @@ that requires manual inspection and restoration.
 
 Files: `SpoofMACAddress.py`, `test_spoof_mac_address.py`
 
-Catch only the final lookup's runtime failure after mutation and reuse the
-established sanitized partial-state result.
+Catch only the final lookup's execution or parse failure after mutation and
+reuse the established sanitized partial-state result.
 
 ### U2: Lock the boundary into verification
 
@@ -56,3 +56,23 @@ operator guidance, and truthful completed evidence.
 
 - Do not execute privileged commands or add automatic rollback.
 - Do not expose interface/address identifiers or change address normalization.
+
+## Work Completed
+
+- Wrapped final observed-address execution and parse failures in the established
+  sanitized partial-state boundary after all mutation commands complete.
+- Suppressed the original lookup exception context while preserving the
+  existing mismatch result and every pre-mutation error path.
+- Added a no-secret mocked regression, static contracts, and synchronized
+  operator guidance.
+
+## Verification Completed
+
+- The focused verification-lookup regressions and all 23 mocked, non-privileged unit tests
+  passed on the available Python 3.12 runtime.
+- `make lint`, `make test`, `make build`, `make verify`, and `make check` passed
+  from the repository and through the absolute Makefile path from an external working directory.
+- Five isolated hostile mutations covering the lookup boundary, context
+  suppression, regression, guidance, and completed plan status were rejected.
+- `git diff --check` and explicit bytecode, dependency, credential, binary,
+  mode, and intended-path audits passed.

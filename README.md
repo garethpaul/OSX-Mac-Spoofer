@@ -95,6 +95,8 @@ restoration instead of claiming the operation failed before state changed.
 A failure from the address mutation command itself is also treated as a
 possible partial state because the operating system may have applied the change
 before returning an error or timing out.
+Failure of the final verification lookup is likewise reported as sanitized
+partial state because the address mutation has already been attempted.
 Observed current and hardware addresses from `ifconfig` and `networksetup` are
 normalized separately because real hardware addresses are commonly globally
 administered.

@@ -66,6 +66,8 @@ Helpful reports include:
 - Failure of the address mutation command itself should be treated as a possible
   partial state because an error does not prove the operating system left the
   interface unchanged.
+- Failure of the final verification lookup should report sanitized partial
+  state without exposing command, interface, address, or captured-output details.
 - Python bytecode is local tooling output and should not remain after
   verification gates.
 - Pinned, read-only hosted Linux validation runs only mocked command tests and

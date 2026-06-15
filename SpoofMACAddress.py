@@ -196,7 +196,13 @@ def set_mac_address(
         if command == address_command:
             address_changed = True
 
-    new_address = get_mac_address(checked_interface)
+    try:
+        new_address = get_mac_address(checked_interface)
+    except (RuntimeError, ValueError):
+        raise RuntimeError(
+            "network command failed after interface address mutation; "
+            "inspect and restore state manually"
+        ) from None
     if new_address != checked_address:
         raise RuntimeError("interface did not adopt requested MAC address")
     print(
