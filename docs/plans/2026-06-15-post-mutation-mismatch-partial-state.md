@@ -1,6 +1,6 @@
 # Post-Mutation Mismatch Partial State
 
-Status: planned
+Status: completed
 
 ## Summary
 
@@ -28,8 +28,8 @@ required.
 
 ## Key Technical Decisions
 
-- Reuse the existing identifier-free partial-state message rather than adding a
-  second recovery contract.
+- Use a mismatch-specific identifier-free message while retaining the same
+  manual inspection and restoration policy as other partial-state failures.
 - Keep mismatch detection after the final observed-address lookup and before
   any success output.
 - Do not attempt automatic rollback because the actual interface state and
@@ -98,8 +98,22 @@ working directory; exact diff and artifact/security audits remain clean.
 
 ## Work Completed
 
-Pending implementation.
+- Added a mismatch-specific sanitized partial-state message while preserving
+  the existing command and lookup failure wording.
+- Extended the existing mocked mismatch regression to require recovery guidance,
+  identifier redaction, and suppressed exception context.
+- Added mutation-sensitive source, test, documentation, and completed-plan
+  contracts.
 
 ## Verification Completed
 
-Pending implementation and verification.
+- The focused mismatch regression and all 23 mocked, non-privileged unit tests
+  passed on Python 3.12.
+- `make lint`, `make test`, `make build`, `make verify`, and `make check` passed
+  from the repository; the absolute-Makefile check passed from an external working directory.
+- Six isolated hostile mutations were rejected for restoring the old mismatch
+  error, removing recovery/redaction assertions, missing guidance, and stale
+  plan status.
+- Exact diff, whitespace, bytecode, artifact, dependency/configuration,
+  conflict-marker, credential, binary, mode, and intended-path audits passed.
+- No privileged macOS networking command was executed.

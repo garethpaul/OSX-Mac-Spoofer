@@ -14,6 +14,14 @@ from typing import Iterable, List, Optional, Sequence, Tuple
 DEFAULT_WIRELESS_ADDRESS = "02:23:45:67:89:ab"
 DEFAULT_WIRED_ADDRESS = "02:ef:12:34:56:78"
 COMMAND_TIMEOUT_SECONDS = 15
+PARTIAL_STATE_ERROR = (
+    "network command failed after interface address mutation; "
+    "inspect and restore state manually"
+)
+MISMATCH_PARTIAL_STATE_ERROR = (
+    "interface address did not match requested value after mutation; "
+    "inspect and restore state manually"
+)
 
 # Path to Airport binary differs between OS X releases. This is the 10.7 path.
 PATH_TO_AIRPORT = "/System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport"
@@ -188,10 +196,7 @@ def set_mac_address(
             execute(command)
         except RuntimeError:
             if address_changed or command == address_command:
-                raise RuntimeError(
-                    "network command failed after interface address mutation; "
-                    "inspect and restore state manually"
-                ) from None
+                raise RuntimeError(PARTIAL_STATE_ERROR) from None
             raise
         if command == address_command:
             address_changed = True
@@ -199,12 +204,9 @@ def set_mac_address(
     try:
         new_address = get_mac_address(checked_interface)
     except (RuntimeError, ValueError):
-        raise RuntimeError(
-            "network command failed after interface address mutation; "
-            "inspect and restore state manually"
-        ) from None
+        raise RuntimeError(PARTIAL_STATE_ERROR) from None
     if new_address != checked_address:
-        raise RuntimeError("interface did not adopt requested MAC address")
+        raise RuntimeError(MISMATCH_PARTIAL_STATE_ERROR) from None
     print(
         "Changed {} (h/w: {}) from {} to {}.".format(
             checked_interface, hardware_address, old_address, new_address

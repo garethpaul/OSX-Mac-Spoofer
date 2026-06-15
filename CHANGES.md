@@ -10,6 +10,8 @@
   state because an error may follow an already-applied network change.
 - Report final verification lookup failures as identifier-free partial state
   requiring manual inspection and restoration.
+- Report post-mutation address mismatches through the same identifier-free
+  partial-state recovery boundary.
 
 ## 2026-06-14
 

@@ -23,6 +23,7 @@ PRE_CHANGE_HARDWARE_PLAN = "docs/plans/2026-06-15-pre-change-hardware-capture.md
 PARTIAL_MUTATION_PLAN = "docs/plans/2026-06-15-partial-mutation-error-boundary.md"
 MUTATION_COMMAND_ERROR_PLAN = "docs/plans/2026-06-15-mutation-command-error-boundary.md"
 POST_MUTATION_VERIFICATION_ERROR_PLAN = "docs/plans/2026-06-15-post-mutation-verification-error.md"
+POST_MUTATION_MISMATCH_PLAN = "docs/plans/2026-06-15-post-mutation-mismatch-partial-state.md"
 REQUIRED = [
     ".github/workflows/check.yml",
     ".gitignore",
@@ -58,6 +59,7 @@ REQUIRED = [
     PARTIAL_MUTATION_PLAN,
     MUTATION_COMMAND_ERROR_PLAN,
     POST_MUTATION_VERIFICATION_ERROR_PLAN,
+    POST_MUTATION_MISMATCH_PLAN,
     "scripts/check-baseline.py",
     "test_spoof_mac_address.py",
 ]
@@ -131,7 +133,8 @@ def main():
         "except subprocess.TimeoutExpired",
         "failed with exit status",
         "if new_address != checked_address:",
-        "interface did not adopt requested MAC address",
+        "PARTIAL_STATE_ERROR = (",
+        "MISMATCH_PARTIAL_STATE_ERROR = (",
         'address_command = ["ifconfig", checked_interface, "ether", checked_address]',
         "address_changed = False",
         "if address_changed or command == address_command:",
@@ -156,8 +159,8 @@ def main():
         "        if command == address_command:",
         "            address_changed = True",
         "new_address = get_mac_address(checked_interface)",
-        "    except (RuntimeError, ValueError):\n        raise RuntimeError(\n            \"network command failed after interface address mutation; \"",
-        "if new_address != checked_address:",
+        "    except (RuntimeError, ValueError):\n        raise RuntimeError(PARTIAL_STATE_ERROR) from None",
+        "if new_address != checked_address:\n        raise RuntimeError(MISMATCH_PARTIAL_STATE_ERROR) from None",
         '"Changed {} (h/w: {}) from {} to {}."',
     ]
     if any(marker not in set_source for marker in set_markers) or not all(
@@ -170,13 +173,18 @@ def main():
     verification_lookup_boundary = '''try:
         new_address = get_mac_address(checked_interface)
     except (RuntimeError, ValueError):
-        raise RuntimeError(
-            "network command failed after interface address mutation; "
-            "inspect and restore state manually"
-        ) from None'''
+        raise RuntimeError(PARTIAL_STATE_ERROR) from None'''
     if verification_lookup_boundary not in set_source:
         failures.append(
             "post-mutation verification lookup must use the sanitized partial-state boundary"
+        )
+    mismatch_boundary = '''if new_address != checked_address:
+        raise RuntimeError(MISMATCH_PARTIAL_STATE_ERROR) from None'''
+    if mismatch_boundary not in set_source or set_source.count(
+        "raise RuntimeError(PARTIAL_STATE_ERROR) from None"
+    ) != 2:
+        failures.append(
+            "post-mutation mismatch must use its sanitized partial-state boundary"
         )
 
     wrapper = read("SpoofMACAddress")
@@ -211,6 +219,7 @@ def main():
         "get_mac_address.call_args_list",
         "self.assertIs(failure, raised.exception)",
         "inspect and restore state manually",
+        "self.assertTrue(raised.exception.__suppress_context__)",
         "00:00:00:00:00:00",
         "01:23:45:67:89:ab",
         "00:23:45:67:89:ab",
@@ -228,6 +237,23 @@ def main():
     ]:
         if phrase not in tests:
             failures.append(f"tests must include {phrase}")
+    mismatch_test = tests.split(
+        "def test_set_mac_address_rejects_post_change_mismatch_without_identifiers",
+        1,
+    )[-1].split("def test_set_mac_address_captures_hardware_before_mutation", 1)[0]
+    for phrase in [
+        '"interface address did not match requested value after mutation"',
+        'self.assertNotIn("en0", message)',
+        'self.assertNotIn("02:23:45:67:89:ab", message)',
+        'self.assertNotIn("02:aa:bb:cc:dd:ee", message)',
+        'self.assertIn("inspect and restore state manually", message)',
+        "self.assertIsNone(raised.exception.__cause__)",
+        "self.assertTrue(raised.exception.__suppress_context__)",
+    ]:
+        if phrase not in mismatch_test:
+            failures.append(
+                f"post-mutation mismatch regression must retain {phrase}"
+            )
 
     post_change_docs = {
         "README.md": "success is reported only after the observed interface address matches",
@@ -272,6 +298,15 @@ def main():
         "CHANGES.md": "Report final verification lookup failures as identifier-free partial state",
     }
     for path, phrase in verification_error_docs.items():
+        if phrase not in " ".join(read(path).split()):
+            failures.append(f"{path} must include {phrase}")
+    mismatch_partial_state_docs = {
+        "README.md": "post-mutation mismatch is reported as sanitized partial state requiring manual inspection and restoration",
+        "SECURITY.md": "post-mutation address mismatch should report sanitized partial state",
+        "VISION.md": "Treat post-mutation address mismatches as sanitized partial state",
+        "CHANGES.md": "Report post-mutation address mismatches through the same identifier-free partial-state recovery boundary",
+    }
+    for path, phrase in mismatch_partial_state_docs.items():
         if phrase not in " ".join(read(path).split()):
             failures.append(f"{path} must include {phrase}")
     changes = " ".join(read("CHANGES.md").split())
@@ -718,6 +753,34 @@ def main():
         if evidence not in verification_error_verification:
             failures.append(
                 f"post-mutation verification error verification must record {evidence}"
+            )
+
+    mismatch_plan = read(POST_MUTATION_MISMATCH_PLAN)
+    mismatch_status = re.findall(r"(?mi)^status:\s*(.+?)\s*$", mismatch_plan)
+    mismatch_work = markdown_section(mismatch_plan, "Work Completed")
+    mismatch_verification = markdown_section(mismatch_plan, "Verification Completed")
+    if (mismatch_status != ["completed"] or not mismatch_work or
+            not mismatch_verification or re.search(
+                r"(?i)\b(?:pending|todo|tbd|not run|to be recorded)\b",
+                mismatch_verification,
+            )):
+        failures.append(
+            "post-mutation mismatch plan must record completed verification"
+        )
+    for evidence in [
+        "23 mocked, non-privileged unit tests",
+        "make lint",
+        "make test",
+        "make build",
+        "make verify",
+        "make check",
+        "external working directory",
+        "Six isolated hostile mutations",
+        "Exact diff",
+    ]:
+        if evidence not in mismatch_verification:
+            failures.append(
+                f"post-mutation mismatch verification must record {evidence}"
             )
 
     guidance = " ".join(

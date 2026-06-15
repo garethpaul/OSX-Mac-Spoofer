@@ -174,7 +174,8 @@ class SpoofMacAddressTest(unittest.TestCase):
                 ],
             ) as get_mac_address:
                 with self.assertRaisesRegex(
-                    RuntimeError, "interface did not adopt requested MAC address"
+                    RuntimeError,
+                    "interface address did not match requested value after mutation",
                 ) as raised:
                     spoof.set_mac_address("en0", "02:23:45:67:89:ab")
 
@@ -191,6 +192,9 @@ class SpoofMacAddressTest(unittest.TestCase):
         self.assertNotIn("en0", message)
         self.assertNotIn("02:23:45:67:89:ab", message)
         self.assertNotIn("02:aa:bb:cc:dd:ee", message)
+        self.assertIn("inspect and restore state manually", message)
+        self.assertIsNone(raised.exception.__cause__)
+        self.assertTrue(raised.exception.__suppress_context__)
 
     def test_set_mac_address_captures_hardware_before_mutation(self):
         events = []

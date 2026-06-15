@@ -68,6 +68,8 @@ Helpful reports include:
   interface unchanged.
 - Failure of the final verification lookup should report sanitized partial
   state without exposing command, interface, address, or captured-output details.
+- A post-mutation address mismatch should report sanitized partial state and
+  require manual inspection and restoration without exposing identifiers.
 - Python bytecode is local tooling output and should not remain after
   verification gates.
 - Pinned, read-only hosted Linux validation runs only mocked command tests and
