@@ -85,6 +85,8 @@ Every platform command uses a bounded command timeout of 15 seconds; timeout
 errors identify the executable without echoing interface or MAC arguments.
 Nonzero command failures likewise report only the executable and exit status,
 without repeating command arguments or captured output.
+Command launch error handling reports only that the executable could not be
+started, without exposing OS exception text, host paths, or command arguments.
 Live success is reported only after the observed interface address matches the
 validated target. A post-mutation mismatch is reported as sanitized partial
 state requiring manual inspection and restoration, without exposing the

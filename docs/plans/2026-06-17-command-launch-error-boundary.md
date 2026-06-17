@@ -1,6 +1,6 @@
 # Command Launch Error Boundary
 
-status: planned
+status: completed
 
 ## Problem
 
@@ -66,6 +66,27 @@ completed plan evidence against isolated hostile mutations.
 - Do not expose raw OS exception text or command arguments in user-facing
   diagnostics.
 - Do not merge or close any stacked pull request.
+
+## Work Completed
+
+- Converted command-launch `OSError` failures into context-suppressed runtime
+  errors that name only the executable.
+- Preserved the post-mutation partial-state wrapper so an address-command launch
+  failure cannot imply the interface remained unchanged.
+- Added direct and mutation-path regressions, static contracts, synchronized
+  operator guidance, and this completed evidence record.
+
+## Verification Completed
+
+- two focused command launch regressions passed for direct execution and
+  address-mutation partial state.
+- The complete suite passed with 25 mocked, non-privileged unit tests.
+- All Make aliases passed, including the absolute Makefile check from an
+  external directory; shell syntax and Python compilation also passed.
+- Six isolated hostile mutations were rejected for the catch, sanitized message,
+  context suppression, regression registration, guidance, and plan status.
+- The exact diff, generated-artifact, credential-signature, conflict-marker,
+  mode, binary, large-file, and whitespace audits passed.
 
 ## Risks
 

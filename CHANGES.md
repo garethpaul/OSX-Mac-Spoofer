@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-17
+
+- Added command launch error handling that suppresses raw OS details while
+  preserving partial-state recovery after address mutation begins.
+
 ## 2026-06-15
 
 - Capture current and hardware addresses before mutation commands begin so a

@@ -24,6 +24,7 @@ PARTIAL_MUTATION_PLAN = "docs/plans/2026-06-15-partial-mutation-error-boundary.m
 MUTATION_COMMAND_ERROR_PLAN = "docs/plans/2026-06-15-mutation-command-error-boundary.md"
 POST_MUTATION_VERIFICATION_ERROR_PLAN = "docs/plans/2026-06-15-post-mutation-verification-error.md"
 POST_MUTATION_MISMATCH_PLAN = "docs/plans/2026-06-15-post-mutation-mismatch-partial-state.md"
+COMMAND_LAUNCH_ERROR_PLAN = "docs/plans/2026-06-17-command-launch-error-boundary.md"
 REQUIRED = [
     ".github/workflows/check.yml",
     ".gitignore",
@@ -60,6 +61,7 @@ REQUIRED = [
     MUTATION_COMMAND_ERROR_PLAN,
     POST_MUTATION_VERIFICATION_ERROR_PLAN,
     POST_MUTATION_MISMATCH_PLAN,
+    COMMAND_LAUNCH_ERROR_PLAN,
     "scripts/check-baseline.py",
     "test_spoof_mac_address.py",
 ]
@@ -131,6 +133,8 @@ def main():
         "COMMAND_TIMEOUT_SECONDS = 15",
         "timeout=COMMAND_TIMEOUT_SECONDS",
         "except subprocess.TimeoutExpired",
+        "except OSError:",
+        'raise RuntimeError(f"{checked_command[0]} could not be started") from None',
         "failed with exit status",
         "if new_address != checked_address:",
         "PARTIAL_STATE_ERROR = (",
@@ -233,6 +237,10 @@ def main():
         "test_execute_uses_bounded_timeout",
         "test_execute_reports_timeout_without_command_arguments",
         "test_execute_reports_failure_without_output_or_command_arguments",
+        "test_execute_reports_launch_failure_without_os_details_or_arguments",
+        "test_set_mac_address_reports_partial_state_when_mutation_cannot_start",
+        'RuntimeError, "ifconfig could not be started"',
+        '"/private/path/ifconfig"',
         "host-secret diagnostic",
     ]:
         if phrase not in tests:
@@ -309,6 +317,9 @@ def main():
     for path, phrase in mismatch_partial_state_docs.items():
         if phrase not in " ".join(read(path).split()):
             failures.append(f"{path} must include {phrase}")
+    for path in ["README.md", "SECURITY.md", "VISION.md", "CHANGES.md"]:
+        if "command launch error handling" not in read(path).lower():
+            failures.append(f"{path} must document command launch error handling")
     changes = " ".join(read("CHANGES.md").split())
     if "source compilation, shell syntax, and checker paths" not in changes:
         failures.append(
@@ -782,6 +793,23 @@ def main():
             failures.append(
                 f"post-mutation mismatch verification must record {evidence}"
             )
+
+    launch_error_plan = read(COMMAND_LAUNCH_ERROR_PLAN)
+    launch_error_status = re.findall(r"(?mi)^status:\s*(.+?)\s*$", launch_error_plan)
+    launch_error_verification = markdown_section(
+        launch_error_plan, "Verification Completed"
+    )
+    if (launch_error_status != ["completed"] or
+            "two focused command launch regressions passed" not in launch_error_verification or
+            "25 mocked, non-privileged unit tests" not in launch_error_verification or
+            "All Make aliases passed" not in launch_error_verification or
+            "external directory" not in launch_error_verification or
+            "Six isolated hostile mutations were rejected" not in launch_error_verification or
+            re.search(r"(?i)\b(?:pending|todo|tbd|not run|to be recorded)\b",
+                      launch_error_verification)):
+        failures.append(
+            "command launch error boundary plan must record completed verification"
+        )
 
     guidance = " ".join(
         "\n".join(read(path) for path in ["README.md", "SECURITY.md", "VISION.md", "CHANGES.md"]).split()

@@ -56,6 +56,8 @@ Helpful reports include:
 - Nonzero command failures should report only the executable and exit status;
   captured standard output, standard error, and command arguments may contain
   host-specific details and should not be repeated.
+- Command launch error handling should suppress raw OS exception details and
+  expose only the executable name through the controlled runtime error path.
 - Post-change verification should require the observed address to match the
   requested target and report mismatches without interface or MAC identifiers.
 - Current and hardware address lookup should complete before mutation commands

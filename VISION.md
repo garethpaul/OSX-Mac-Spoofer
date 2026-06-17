@@ -40,6 +40,8 @@ Priority:
   subprocess execution
 - Keep a bounded command timeout around every platform tool invocation
 - Keep nonzero command errors free of captured output and command arguments
+- Keep command launch error handling free of OS exception text, host paths, and
+  command arguments
 - Require the observed post-command address to match the requested target
   before reporting success
 - Capture current and hardware addresses before mutation commands begin

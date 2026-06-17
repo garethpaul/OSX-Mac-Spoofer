@@ -131,6 +131,8 @@ def execute(command: Sequence[str], *, dry_run: bool = False) -> str:
         raise RuntimeError(
             f"{checked_command[0]} timed out after {COMMAND_TIMEOUT_SECONDS} seconds"
         ) from None
+    except OSError:
+        raise RuntimeError(f"{checked_command[0]} could not be started") from None
     if result.returncode != 0:
         raise RuntimeError(
             f"{checked_command[0]} failed with exit status {result.returncode}"
