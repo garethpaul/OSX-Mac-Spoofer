@@ -98,6 +98,23 @@ class SpoofMacAddressTest(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     spoof.execute(command, dry_run=True)
 
+    def test_execute_dry_run_omits_command_arguments(self):
+        output = io.StringIO()
+        with redirect_stdout(output):
+            spoof.execute(
+                ["ifconfig", "private-interface", "ether", "02:23:45:67:89:ab"],
+                dry_run=True,
+            )
+
+        self.assertEqual("+ ifconfig\n", output.getvalue())
+        for sensitive_value in ["private-interface", "02:23:45:67:89:ab", "ether"]:
+            self.assertNotIn(sensitive_value, output.getvalue())
+
+        output = io.StringIO()
+        with redirect_stdout(output):
+            spoof.execute(["private-command", "host-secret"], dry_run=True)
+        self.assertEqual("+ command\n", output.getvalue())
+
     def test_execute_uses_bounded_timeout(self):
         completed = mock.Mock(returncode=0, stdout="ok", stderr="")
         with mock.patch.object(spoof.subprocess, "run", return_value=completed) as run:
@@ -180,8 +197,18 @@ class SpoofMacAddressTest(unittest.TestCase):
                 spoof.set_mac_address("en0", "0223456789ab", dry_run=True)
 
         get_mac_address.assert_not_called()
-        self.assertIn("Dry run", output.getvalue())
-        self.assertIn("ifconfig en0 ether 02:23:45:67:89:ab", output.getvalue())
+        self.assertEqual(
+            [
+                "Dry run: no network state will be changed.",
+                "+ networksetup",
+                "+ airport",
+                "+ ifconfig",
+                "+ networksetup",
+            ],
+            output.getvalue().splitlines(),
+        )
+        for sensitive_value in ["en0", "en1", "02:23:45:67:89:ab", "ether"]:
+            self.assertNotIn(sensitive_value, output.getvalue())
 
     def test_set_mac_address_rejects_post_change_mismatch_without_identifiers(self):
         with mock.patch.object(spoof, "execute") as execute:
@@ -240,7 +267,18 @@ class SpoofMacAddressTest(unittest.TestCase):
             ["current", "hardware", "execute", "execute", "execute", "execute", "current"],
             events,
         )
-        self.assertIn("Changed en0", output.getvalue())
+        self.assertEqual(
+            "Interface address change verified.\n"
+            "Inspect and restore the interface manually if connectivity is unexpected.\n",
+            output.getvalue(),
+        )
+        for sensitive_value in [
+            "en0",
+            "00:23:45:67:89:ab",
+            "00:11:22:33:44:55",
+            "02:23:45:67:89:ab",
+        ]:
+            self.assertNotIn(sensitive_value, output.getvalue())
 
     def test_set_mac_address_hardware_lookup_failure_prevents_mutation(self):
         with mock.patch.object(spoof, "execute") as execute:

@@ -1,6 +1,6 @@
 # Sensitive Output Redaction
 
-status: planned
+status: completed
 
 ## Problem
 
@@ -74,11 +74,24 @@ guidance, and completed plan evidence against isolated hostile mutations.
 
 ## Work Completed
 
-Pending implementation.
+Replaced full dry-run command rendering with allowlisted executable labels and
+an argument-free fallback. Replaced successful mutation output with generic
+verification and recovery guidance while preserving current and hardware
+address capture, command order, mutation behavior, and post-change validation.
+Added focused omission regressions, static source/test/document contracts, and
+synchronized operator guidance.
 
 ## Verification Completed
 
-Pending implementation and validation.
+- All three focused output regressions and 26 mocked, non-privileged unit tests
+  passed without executing network commands.
+- All Make aliases passed from the repository, and the absolute Makefile gate
+  passed from an external directory.
+- Eight isolated hostile mutations were rejected, covering arbitrary label
+  leakage, full command rendering, success identifier leakage, regression
+  removal or weakening, contract weakening, guidance removal, and incomplete
+  plan status.
+- `git diff --check` passed together with secret and generated-artifact scans.
 
 ## Risks
 

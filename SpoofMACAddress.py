@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import re
-import shlex
 import subprocess
 import sys
 import argparse
@@ -106,8 +105,16 @@ def normalize_command(command: Sequence[str]) -> List[str]:
     return checked_command
 
 
-def command_text(command: Sequence[str]) -> str:
-    return shlex.join(normalize_command(command))
+def dry_run_command_label(executable: str) -> str:
+    """Return a non-sensitive label for a known platform executable."""
+
+    if executable == "networksetup":
+        return "networksetup"
+    if executable == "ifconfig":
+        return "ifconfig"
+    if executable == PATH_TO_AIRPORT:
+        return "airport"
+    return "command"
 
 
 def execute(command: Sequence[str], *, dry_run: bool = False) -> str:
@@ -115,7 +122,7 @@ def execute(command: Sequence[str], *, dry_run: bool = False) -> str:
 
     checked_command = normalize_command(command)
     if dry_run:
-        print(f"+ {command_text(checked_command)}")
+        print(f"+ {dry_run_command_label(checked_command[0])}")
         return ""
 
     try:
@@ -209,16 +216,8 @@ def set_mac_address(
         raise RuntimeError(PARTIAL_STATE_ERROR) from None
     if new_address != checked_address:
         raise RuntimeError(MISMATCH_PARTIAL_STATE_ERROR) from None
-    print(
-        "Changed {} (h/w: {}) from {} to {}.".format(
-            checked_interface, hardware_address, old_address, new_address
-        )
-    )
-    print(
-        "If both addresses are the same, run 'ifconfig {} | grep ether' in a few seconds.".format(
-            checked_interface
-        )
-    )
+    print("Interface address change verified.")
+    print("Inspect and restore the interface manually if connectivity is unexpected.")
 
 
 def build_parser() -> argparse.ArgumentParser:

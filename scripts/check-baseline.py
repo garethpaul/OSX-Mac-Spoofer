@@ -25,6 +25,7 @@ MUTATION_COMMAND_ERROR_PLAN = "docs/plans/2026-06-15-mutation-command-error-boun
 POST_MUTATION_VERIFICATION_ERROR_PLAN = "docs/plans/2026-06-15-post-mutation-verification-error.md"
 POST_MUTATION_MISMATCH_PLAN = "docs/plans/2026-06-15-post-mutation-mismatch-partial-state.md"
 COMMAND_LAUNCH_ERROR_PLAN = "docs/plans/2026-06-17-command-launch-error-boundary.md"
+SENSITIVE_OUTPUT_PLAN = "docs/plans/2026-06-18-sensitive-output-redaction.md"
 REQUIRED = [
     ".github/workflows/check.yml",
     ".gitignore",
@@ -62,6 +63,7 @@ REQUIRED = [
     POST_MUTATION_VERIFICATION_ERROR_PLAN,
     POST_MUTATION_MISMATCH_PLAN,
     COMMAND_LAUNCH_ERROR_PLAN,
+    SENSITIVE_OUTPUT_PLAN,
     "scripts/check-baseline.py",
     "test_spoof_mac_address.py",
 ]
@@ -126,6 +128,7 @@ def main():
         "isinstance(interface, str)",
         "isinstance(output, str)",
         "normalize_command",
+        "dry_run_command_label",
         "command must be a sequence of text arguments",
         "command is required",
         "command arguments must be non-empty text",
@@ -145,6 +148,9 @@ def main():
         "network command failed after interface address mutation",
         "inspect and restore state manually",
         ") from None",
+        'print(f"+ {dry_run_command_label(checked_command[0])}")',
+        'print("Interface address change verified.")',
+        'print("Inspect and restore the interface manually if connectivity is unexpected.")',
     ]:
         if phrase not in script:
             failures.append(f"SpoofMACAddress.py must mention {phrase}")
@@ -152,6 +158,8 @@ def main():
         failures.append("SpoofMACAddress.py must not use raw Popen")
     if "shell=True" in script:
         failures.append("SpoofMACAddress.py must not execute through a shell")
+    if "command_text(" in script or "import shlex" in script:
+        failures.append("SpoofMACAddress.py must not render full dry-run commands")
     set_source = script[script.find("def set_mac_address"):script.find("def build_parser")]
     set_markers = [
         "old_address = get_mac_address(checked_interface)",
@@ -165,7 +173,7 @@ def main():
         "new_address = get_mac_address(checked_interface)",
         "    except (RuntimeError, ValueError):\n        raise RuntimeError(PARTIAL_STATE_ERROR) from None",
         "if new_address != checked_address:\n        raise RuntimeError(MISMATCH_PARTIAL_STATE_ERROR) from None",
-        '"Changed {} (h/w: {}) from {} to {}."',
+        'print("Interface address change verified.")',
     ]
     if any(marker not in set_source for marker in set_markers) or not all(
         set_source.find(left) < set_source.find(right)
@@ -232,6 +240,7 @@ def main():
         "test_validate_interface_rejects_non_string_values",
         "test_parse_mac_address_rejects_non_string_output",
         "test_execute_rejects_malformed_commands",
+        "test_execute_dry_run_omits_command_arguments",
         "ifconfig en0",
         '["ifconfig", " "]',
         "test_execute_uses_bounded_timeout",
@@ -242,6 +251,9 @@ def main():
         'RuntimeError, "ifconfig could not be started"',
         '"/private/path/ifconfig"',
         "host-secret diagnostic",
+        'self.assertEqual("+ ifconfig\\n", output.getvalue())',
+        'self.assertEqual("+ command\\n", output.getvalue())',
+        '"Interface address change verified.\\n"',
     ]:
         if phrase not in tests:
             failures.append(f"tests must include {phrase}")
@@ -262,6 +274,31 @@ def main():
             failures.append(
                 f"post-mutation mismatch regression must retain {phrase}"
             )
+    dry_run_output_test = tests.split(
+        "def test_execute_dry_run_omits_command_arguments", 1
+    )[-1].split("def test_execute_uses_bounded_timeout", 1)[0]
+    for phrase in [
+        'self.assertEqual("+ ifconfig\\n", output.getvalue())',
+        'self.assertEqual("+ command\\n", output.getvalue())',
+        '"private-interface"',
+        '"02:23:45:67:89:ab"',
+        'self.assertNotIn(sensitive_value, output.getvalue())',
+    ]:
+        if phrase not in dry_run_output_test:
+            failures.append(f"dry-run output regression must retain {phrase}")
+    success_output_test = tests.split(
+        "def test_set_mac_address_captures_hardware_before_mutation", 1
+    )[-1].split("def test_set_mac_address_hardware_lookup_failure_prevents_mutation", 1)[0]
+    for phrase in [
+        '"Interface address change verified.\\n"',
+        '"en0"',
+        '"00:23:45:67:89:ab"',
+        '"00:11:22:33:44:55"',
+        '"02:23:45:67:89:ab"',
+        'self.assertNotIn(sensitive_value, output.getvalue())',
+    ]:
+        if phrase not in success_output_test:
+            failures.append(f"successful output regression must retain {phrase}")
 
     post_change_docs = {
         "README.md": "success is reported only after the observed interface address matches",
@@ -320,6 +357,8 @@ def main():
     for path in ["README.md", "SECURITY.md", "VISION.md", "CHANGES.md"]:
         if "command launch error handling" not in read(path).lower():
             failures.append(f"{path} must document command launch error handling")
+        if "sensitive output redaction" not in read(path).lower():
+            failures.append(f"{path} must document sensitive output redaction")
     changes = " ".join(read("CHANGES.md").split())
     if "source compilation, shell syntax, and checker paths" not in changes:
         failures.append(
@@ -810,6 +849,35 @@ def main():
         failures.append(
             "command launch error boundary plan must record completed verification"
         )
+
+    sensitive_output_plan = read(SENSITIVE_OUTPUT_PLAN)
+    sensitive_output_status = re.findall(
+        r"(?mi)^status:\s*(.+?)\s*$", sensitive_output_plan
+    )
+    sensitive_output_work = markdown_section(sensitive_output_plan, "Work Completed")
+    sensitive_output_verification = markdown_section(
+        sensitive_output_plan, "Verification Completed"
+    )
+    if (sensitive_output_status != ["completed"] or not sensitive_output_work or
+            not sensitive_output_verification or re.search(
+                r"(?i)\b(?:pending|todo|tbd|not run|to be recorded)\b",
+                sensitive_output_verification,
+            )):
+        failures.append(
+            "sensitive output redaction plan must record completed verification"
+        )
+    for evidence in [
+        "26 mocked, non-privileged unit tests",
+        "All Make aliases passed",
+        "external directory",
+        "isolated hostile mutations were rejected",
+        "git diff --check",
+        "secret and generated-artifact scans",
+    ]:
+        if evidence not in sensitive_output_verification:
+            failures.append(
+                f"sensitive output redaction verification must record {evidence}"
+            )
 
     guidance = " ".join(
         "\n".join(read(path) for path in ["README.md", "SECURITY.md", "VISION.md", "CHANGES.md"]).split()

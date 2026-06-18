@@ -1,5 +1,10 @@
 # Changes
 
+## 2026-06-18
+
+- Added sensitive output redaction for dry-run command arguments and successful
+  mutation output while retaining command ordering and verification behavior.
+
 ## 2026-06-17
 
 - Added command launch error handling that suppresses raw OS details while
