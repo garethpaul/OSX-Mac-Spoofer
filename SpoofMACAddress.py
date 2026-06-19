@@ -13,6 +13,8 @@ from typing import Iterable, List, Optional, Sequence, Tuple
 DEFAULT_WIRELESS_ADDRESS = "02:23:45:67:89:ab"
 DEFAULT_WIRED_ADDRESS = "02:ef:12:34:56:78"
 COMMAND_TIMEOUT_SECONDS = 15
+IFCONFIG_PATH = "/sbin/ifconfig"
+NETWORKSETUP_PATH = "/usr/sbin/networksetup"
 PARTIAL_STATE_ERROR = (
     "network command failed after interface address mutation; "
     "inspect and restore state manually"
@@ -105,12 +107,12 @@ def normalize_command(command: Sequence[str]) -> List[str]:
     return checked_command
 
 
-def dry_run_command_label(executable: str) -> str:
+def command_label(executable: str) -> str:
     """Return a non-sensitive label for a known platform executable."""
 
-    if executable == "networksetup":
+    if executable in {"networksetup", NETWORKSETUP_PATH}:
         return "networksetup"
-    if executable == "ifconfig":
+    if executable in {"ifconfig", IFCONFIG_PATH}:
         return "ifconfig"
     if executable == PATH_TO_AIRPORT:
         return "airport"
@@ -121,8 +123,9 @@ def execute(command: Sequence[str], *, dry_run: bool = False) -> str:
     """Run a command and return stdout, or print it when dry-running."""
 
     checked_command = normalize_command(command)
+    executable_label = command_label(checked_command[0])
     if dry_run:
-        print(f"+ {dry_run_command_label(checked_command[0])}")
+        print(f"+ {executable_label}")
         return ""
 
     try:
@@ -136,13 +139,13 @@ def execute(command: Sequence[str], *, dry_run: bool = False) -> str:
         )
     except subprocess.TimeoutExpired:
         raise RuntimeError(
-            f"{checked_command[0]} timed out after {COMMAND_TIMEOUT_SECONDS} seconds"
+            f"{executable_label} timed out after {COMMAND_TIMEOUT_SECONDS} seconds"
         ) from None
     except OSError:
-        raise RuntimeError(f"{checked_command[0]} could not be started") from None
+        raise RuntimeError(f"{executable_label} could not be started") from None
     if result.returncode != 0:
         raise RuntimeError(
-            f"{checked_command[0]} failed with exit status {result.returncode}"
+            f"{executable_label} failed with exit status {result.returncode}"
         ) from None
     return result.stdout
 
@@ -152,9 +155,9 @@ def get_mac_address(interface: str, *, hardware: bool = False) -> str:
 
     checked_interface = validate_interface(interface)
     if hardware:
-        output = execute(["networksetup", "-getmacaddress", checked_interface])
+        output = execute([NETWORKSETUP_PATH, "-getmacaddress", checked_interface])
     else:
-        output = execute(["ifconfig", checked_interface])
+        output = execute([IFCONFIG_PATH, checked_interface])
     return parse_mac_address(output)
 
 
@@ -167,10 +170,10 @@ def change_commands(
     checked_airport_interface = validate_interface(airport_interface)
     checked_address = normalize_mac_address(address)
     return [
-        ["networksetup", "-setairportpower", checked_airport_interface, "on"],
+        [NETWORKSETUP_PATH, "-setairportpower", checked_airport_interface, "on"],
         [PATH_TO_AIRPORT, "-z"],
-        ["ifconfig", checked_interface, "ether", checked_address],
-        ["networksetup", "-detectnewhardware"],
+        [IFCONFIG_PATH, checked_interface, "ether", checked_address],
+        [NETWORKSETUP_PATH, "-detectnewhardware"],
     ]
 
 
@@ -198,7 +201,7 @@ def set_mac_address(
     old_address = get_mac_address(checked_interface)
     hardware_address = get_mac_address(checked_interface, hardware=True)
 
-    address_command = ["ifconfig", checked_interface, "ether", checked_address]
+    address_command = [IFCONFIG_PATH, checked_interface, "ether", checked_address]
     address_changed = False
     for command in commands:
         try:

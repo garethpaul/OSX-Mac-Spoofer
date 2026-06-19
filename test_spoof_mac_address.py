@@ -124,13 +124,14 @@ class SpoofMacAddressTest(unittest.TestCase):
 
     def test_execute_reports_timeout_without_command_arguments(self):
         timeout = spoof.subprocess.TimeoutExpired(
-            cmd=["ifconfig", "private-interface"],
+            cmd=["/sbin/ifconfig", "private-interface"],
             timeout=spoof.COMMAND_TIMEOUT_SECONDS,
         )
         with mock.patch.object(spoof.subprocess, "run", side_effect=timeout):
-            with self.assertRaisesRegex(RuntimeError, "ifconfig timed out after 15 seconds") as raised:
-                spoof.execute(["ifconfig", "private-interface"])
+            with self.assertRaises(RuntimeError) as raised:
+                spoof.execute(["/sbin/ifconfig", "private-interface"])
 
+        self.assertEqual("ifconfig timed out after 15 seconds", str(raised.exception))
         self.assertNotIn("private-interface", str(raised.exception))
         self.assertIsNone(raised.exception.__cause__)
         self.assertTrue(raised.exception.__suppress_context__)
@@ -142,12 +143,11 @@ class SpoofMacAddressTest(unittest.TestCase):
             stderr="host-secret diagnostic",
         )
         with mock.patch.object(spoof.subprocess, "run", return_value=completed):
-            with self.assertRaisesRegex(
-                RuntimeError, "ifconfig failed with exit status 23"
-            ) as raised:
-                spoof.execute(["ifconfig", "private-interface"])
+            with self.assertRaises(RuntimeError) as raised:
+                spoof.execute(["/sbin/ifconfig", "private-interface"])
 
         message = str(raised.exception)
+        self.assertEqual("ifconfig failed with exit status 23", message)
         for sensitive_value in [
             "private-interface",
             "02:23:45:67:89:ab",
@@ -163,12 +163,11 @@ class SpoofMacAddressTest(unittest.TestCase):
             2, "No such file or directory", "/private/path/ifconfig"
         )
         with mock.patch.object(spoof.subprocess, "run", side_effect=failure):
-            with self.assertRaisesRegex(
-                RuntimeError, "ifconfig could not be started"
-            ) as raised:
-                spoof.execute(["ifconfig", "private-interface"])
+            with self.assertRaises(RuntimeError) as raised:
+                spoof.execute(["/sbin/ifconfig", "private-interface"])
 
         message = str(raised.exception)
+        self.assertEqual("ifconfig could not be started", message)
         for sensitive_value in [
             "private-interface",
             "/private/path",
@@ -186,9 +185,39 @@ class SpoofMacAddressTest(unittest.TestCase):
             airport_interface="en1",
         )
 
-        self.assertIn(["ifconfig", "en0", "ether", "02:23:45:67:89:ab"], commands)
+        self.assertIn(
+            ["/sbin/ifconfig", "en0", "ether", "02:23:45:67:89:ab"],
+            commands,
+        )
+        self.assertEqual("/usr/sbin/networksetup", commands[0][0])
+        self.assertEqual(spoof.PATH_TO_AIRPORT, commands[1][0])
+        self.assertEqual("/usr/sbin/networksetup", commands[3][0])
         for command in commands:
             self.assertIsInstance(command, list)
+            self.assertTrue(pathlib.PurePosixPath(command[0]).is_absolute())
+
+    def test_get_mac_address_uses_absolute_system_paths(self):
+        with mock.patch.object(
+            spoof,
+            "execute",
+            side_effect=[
+                "ether 00:23:45:67:89:ab",
+                "Ethernet Address: 00:11:22:33:44:55",
+            ],
+        ) as execute:
+            self.assertEqual("00:23:45:67:89:ab", spoof.get_mac_address("en0"))
+            self.assertEqual(
+                "00:11:22:33:44:55",
+                spoof.get_mac_address("en0", hardware=True),
+            )
+
+        self.assertEqual(
+            [
+                mock.call(["/sbin/ifconfig", "en0"]),
+                mock.call(["/usr/sbin/networksetup", "-getmacaddress", "en0"]),
+            ],
+            execute.call_args_list,
+        )
 
     def test_set_mac_address_dry_run_does_not_read_current_address(self):
         output = io.StringIO()

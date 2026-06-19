@@ -87,6 +87,8 @@ Nonzero command failures likewise report only the executable and exit status,
 without repeating command arguments or captured output.
 Command launch error handling reports only that the executable could not be
 started, without exposing OS exception text, host paths, or command arguments.
+Privileged networking tools are invoked through fixed macOS system paths rather
+than resolved through the caller's `PATH` environment.
 Sensitive output redaction limits dry-run output to allowlisted executable
 labels and reports successful verification without interface or MAC values.
 Live success is reported only after the observed interface address matches the

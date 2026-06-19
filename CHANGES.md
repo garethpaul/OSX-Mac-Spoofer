@@ -2,6 +2,8 @@
 
 ## 2026-06-18
 
+- Bound privileged networking commands to fixed macOS system paths so a
+  caller-controlled `PATH` cannot substitute another executable.
 - Added sensitive output redaction for dry-run command arguments and successful
   mutation output while retaining command ordering and verification behavior.
 
