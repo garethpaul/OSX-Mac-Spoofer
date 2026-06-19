@@ -42,6 +42,10 @@ Priority:
 - Keep nonzero command errors free of captured output and command arguments
 - Keep command launch error handling free of OS exception text, host paths, and
   command arguments
+- Resolve privileged networking tools through fixed macOS system paths, never
+  through the caller's `PATH`
+- Keep sensitive output redaction on dry-run and successful mutation paths so
+  interface and MAC values are not emitted
 - Require the observed post-command address to match the requested target
   before reporting success
 - Capture current and hardware addresses before mutation commands begin
