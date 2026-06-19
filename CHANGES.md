@@ -1,5 +1,50 @@
 # Changes
 
+## 2026-06-18
+
+- Bound privileged networking commands to fixed macOS system paths so a
+  caller-controlled `PATH` cannot substitute another executable.
+- Added sensitive output redaction for dry-run command arguments and successful
+  mutation output while retaining command ordering and verification behavior.
+
+## 2026-06-17
+
+- Added command launch error handling that suppresses raw OS details while
+  preserving partial-state recovery after address mutation begins.
+
+## 2026-06-15
+
+- Capture current and hardware addresses before mutation commands begin so a
+  lookup failure cannot follow an already-applied network change.
+- Report later command failures as an identifier-free partial mutation state
+  requiring manual inspection and restoration.
+- Treat failure of the address mutation command itself as a possible partial
+  state because an error may follow an already-applied network change.
+- Report final verification lookup failures as identifier-free partial state
+  requiring manual inspection and restoration.
+- Report post-mutation address mismatches through the same identifier-free
+  partial-state recovery boundary.
+
+## 2026-06-14
+
+- Made every standard Make gate resolve mocked tests, source compilation,
+  shell syntax, and checker paths from the repository root.
+
+## 2026-06-13
+
+- Verify the observed post-command interface address matches the requested
+  target before reporting a successful change.
+- Added an explicit hardware-address restoration runbook covering private
+  pre-change capture, dry-run review, direct restoration, state/connectivity
+  verification, failure escalation, and anti-persistence boundaries.
+
+## 2026-06-12
+
+- Disabled persisted checkout credentials and enforced the sole pinned
+  credential-free workflow boundary.
+- Sanitized nonzero platform-command failures so errors report only the
+  executable and exit status, without captured output or command arguments.
+
 ## 2026-06-09
 
 - Rejected malformed command sequences before dry-run rendering or subprocess

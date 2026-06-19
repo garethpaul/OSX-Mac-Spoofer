@@ -83,9 +83,36 @@ Whitespace-only command arguments are rejected before dry-run rendering or
 subprocess execution.
 Every platform command uses a bounded command timeout of 15 seconds; timeout
 errors identify the executable without echoing interface or MAC arguments.
+Nonzero command failures likewise report only the executable and exit status,
+without repeating command arguments or captured output.
+Command launch error handling reports only that the executable could not be
+started, without exposing OS exception text, host paths, or command arguments.
+Privileged networking tools are invoked through fixed macOS system paths rather
+than resolved through the caller's `PATH` environment.
+Sensitive output redaction limits dry-run output to allowlisted executable
+labels and reports successful verification without interface or MAC values.
+Live success is reported only after the observed interface address matches the
+validated target. A post-mutation mismatch is reported as sanitized partial
+state requiring manual inspection and restoration, without exposing the
+interface or either MAC address.
+The live path reads the current and hardware addresses before mutation commands
+begin, so an inspection failure cannot be reported after network state changed.
+If a later command fails after the address mutation succeeds, the utility
+reports a sanitized partial-state error and requires manual inspection and
+restoration instead of claiming the operation failed before state changed.
+A failure from the address mutation command itself is also treated as a
+possible partial state because the operating system may have applied the change
+before returning an error or timing out.
+Failure of the final verification lookup is likewise reported as sanitized
+partial state because the address mutation has already been attempted.
 Observed current and hardware addresses from `ifconfig` and `networksetup` are
 normalized separately because real hardware addresses are commonly globally
 administered.
+Before a live change, follow
+[`docs/hardware-address-restoration.md`](docs/hardware-address-restoration.md)
+to capture the authorized interface and hardware address privately, review the
+dry-run command sequence, restore only the recorded address, and verify current
+state, connectivity, and network policy afterward.
 
 The legacy `SpoofMACAddress` startup wrapper runs dry-run mode by default.
 Set `SPOOF_MAC_ADDRESS_APPLY=1` only when startup-time address changes are
@@ -100,7 +127,8 @@ explicitly intended.
 - `python3 -m unittest discover -v`
 - `python3 SpoofMACAddress.py --dry-run`
 - Pinned hosted Linux validation runs the mocked, non-privileged gate on Python
-  3.10 and 3.12. It never changes an interface or invokes `sudo`.
+  3.10 and 3.12. It never changes an interface or invokes `sudo`. Checkout
+  credentials are not persisted after source retrieval.
 
 `make lint` runs the Python, shell, and static baseline checks; `make build`
 uses the no-network unittest suite as the build-through-test gate; and
@@ -137,11 +165,15 @@ When the required SDK or runtime is unavailable, use static checks and source re
 
 ## Maintenance Notes
 
+- Standard Make aliases resolve mocked tests, source compilation, shell syntax,
+  and checker paths from `Makefile`, so its absolute path works externally.
 - See `SECURITY.md` for vulnerability reporting and safe research guidance.
 - See `CHANGES.md` and `docs/plans/2026-06-08-mac-spoofer-baseline.md` for
   the current modernization baseline.
 - See `docs/plans/2026-06-09-make-gate-aliases.md` for the local Make gate
   aliases.
+- See `docs/hardware-address-restoration.md` for the explicit pre-change and
+  restoration runbook.
 - See `VISION.md` for project direction and contribution guardrails.
 
 ## Contributing
