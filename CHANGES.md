@@ -1,5 +1,17 @@
 # Changes
 
+## 2026-06-18
+
+- Bound privileged networking commands to fixed macOS system paths so a
+  caller-controlled `PATH` cannot substitute another executable.
+- Added sensitive output redaction for dry-run command arguments and successful
+  mutation output while retaining command ordering and verification behavior.
+
+## 2026-06-17
+
+- Added command launch error handling that suppresses raw OS details while
+  preserving partial-state recovery after address mutation begins.
+
 ## 2026-06-15
 
 - Capture current and hardware addresses before mutation commands begin so a
@@ -8,6 +20,10 @@
   requiring manual inspection and restoration.
 - Treat failure of the address mutation command itself as a possible partial
   state because an error may follow an already-applied network change.
+- Report final verification lookup failures as identifier-free partial state
+  requiring manual inspection and restoration.
+- Report post-mutation address mismatches through the same identifier-free
+  partial-state recovery boundary.
 
 ## 2026-06-14
 
