@@ -56,6 +56,12 @@ Helpful reports include:
 - Nonzero command failures should report only the executable and exit status;
   captured standard output, standard error, and command arguments may contain
   host-specific details and should not be repeated.
+- Command launch error handling should suppress raw OS exception details and
+  expose only the executable name through the controlled runtime error path.
+- Privileged networking tools should use fixed macOS system paths so a modified
+  `PATH` cannot redirect execution to an attacker-controlled binary.
+- Sensitive output redaction should keep dry-run command arguments and
+  successful interface or MAC values out of terminal output.
 - Post-change verification should require the observed address to match the
   requested target and report mismatches without interface or MAC identifiers.
 - Current and hardware address lookup should complete before mutation commands
@@ -68,6 +74,8 @@ Helpful reports include:
   interface unchanged.
 - Failure of the final verification lookup should report sanitized partial
   state without exposing command, interface, address, or captured-output details.
+- A post-mutation address mismatch should report sanitized partial state and
+  require manual inspection and restoration without exposing identifiers.
 - Python bytecode is local tooling output and should not remain after
   verification gates.
 - Pinned, read-only hosted Linux validation runs only mocked command tests and

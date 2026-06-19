@@ -85,8 +85,16 @@ Every platform command uses a bounded command timeout of 15 seconds; timeout
 errors identify the executable without echoing interface or MAC arguments.
 Nonzero command failures likewise report only the executable and exit status,
 without repeating command arguments or captured output.
+Command launch error handling reports only that the executable could not be
+started, without exposing OS exception text, host paths, or command arguments.
+Privileged networking tools are invoked through fixed macOS system paths rather
+than resolved through the caller's `PATH` environment.
+Sensitive output redaction limits dry-run output to allowlisted executable
+labels and reports successful verification without interface or MAC values.
 Live success is reported only after the observed interface address matches the
-validated target; mismatch errors omit the interface and both MAC addresses.
+validated target. A post-mutation mismatch is reported as sanitized partial
+state requiring manual inspection and restoration, without exposing the
+interface or either MAC address.
 The live path reads the current and hardware addresses before mutation commands
 begin, so an inspection failure cannot be reported after network state changed.
 If a later command fails after the address mutation succeeds, the utility
