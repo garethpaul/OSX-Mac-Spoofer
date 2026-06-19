@@ -40,9 +40,22 @@ Priority:
   subprocess execution
 - Keep a bounded command timeout around every platform tool invocation
 - Keep nonzero command errors free of captured output and command arguments
+- Keep command launch error handling free of OS exception text, host paths, and
+  command arguments
+- Resolve privileged networking tools through fixed macOS system paths, never
+  through the caller's `PATH`
+- Keep sensitive output redaction on dry-run and successful mutation paths so
+  interface and MAC values are not emitted
 - Require the observed post-command address to match the requested target
   before reporting success
 - Capture current and hardware addresses before mutation commands begin
+- Surface post-mutation command failures as sanitized partial state requiring
+  manual inspection and restoration
+- Treat address mutation command failures as possible partial state rather than
+  proof that the interface remained unchanged
+- Treat final verification lookup failures as sanitized partial state
+- Treat post-mutation address mismatches as sanitized partial state requiring
+  manual inspection and restoration
 - Keep verification targets from leaving Python bytecode behind
 - Keep Python 3.10 and 3.12 hosted Linux validation mocked and non-privileged
 - Keep hosted source retrieval credential-free after checkout
