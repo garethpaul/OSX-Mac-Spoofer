@@ -9,7 +9,8 @@ values could redirect mocked safety verification outside the checkout.
 
 - Resolve the raw Makefile path with POSIX-compatible system tooling.
 - Reject non-file origins for GNU Make's automatic `MAKEFILE_LIST` value.
-- Add dependency-free regressions for every public target and override channel.
+- Shell-quote the resolved root once before any recipe uses it.
+- Add dependency-free dry-run and live command-substitution regressions.
 
 ## Validation
 

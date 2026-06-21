@@ -378,14 +378,15 @@ def main():
         "ifneq ($(origin MAKEFILE_LIST),file)",
         "$(error MAKEFILE_LIST must not be overridden)",
         "override REPO_ROOT := $(shell path=",
+        "override SHELL_REPO_ROOT :=",
         'CDPATH= cd -- "$$directory" && /bin/pwd -P)',
-        'PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -v -s "$(REPO_ROOT)"',
-        'REPO_ROOT="$(REPO_ROOT)" PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -c',
+        "PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -m unittest discover -v -s $(SHELL_REPO_ROOT)",
+        "REPO_ROOT=$(SHELL_REPO_ROOT) PYTHONDONTWRITEBYTECODE=1 $(PYTHON) -c",
         "root = pathlib.Path(os.environ['REPO_ROOT'])",
         "compile((root / path).read_text(), path, 'exec')",
-        'sh -n "$(REPO_ROOT)/SpoofMACAddress"',
-        'PYTHONDONTWRITEBYTECODE=1 $(PYTHON) "$(REPO_ROOT)/scripts/check-baseline.py"',
-        'PYTHONDONTWRITEBYTECODE=1 $(PYTHON) "$(REPO_ROOT)/scripts/test-makefile-root.py"',
+        "sh -n $(SHELL_REPO_ROOT)/SpoofMACAddress",
+        "PYTHONDONTWRITEBYTECODE=1 $(PYTHON) $(SHELL_REPO_ROOT)/scripts/check-baseline.py",
+        "PYTHONDONTWRITEBYTECODE=1 $(PYTHON) $(SHELL_REPO_ROOT)/scripts/test-makefile-root.py",
         "check: test static-check root-test",
         "verify: check",
         "build: test",
@@ -393,6 +394,19 @@ def main():
     ]:
         if phrase not in makefile:
             failures.append(f"Makefile must include {phrase}")
+
+    root_test = read("scripts/test-makefile-root.py")
+    for phrase in [
+        "import shlex",
+        "return result, shlex.quote(str(checkout.resolve()))",
+        "test_live_root_path_does_not_execute_shell_metacharacters",
+        "`touch BACKTICK_PWNED`",
+        '" ; touch QUOTE_PWNED ; echo "',
+        "self.assertFalse((checkout.parent / marker_name).exists(), result.stdout)",
+        'self.assertIn("live root stub passed", result.stdout)',
+    ]:
+        if phrase not in root_test:
+            failures.append(f"Make root regression must include {phrase}")
 
     workflow = read(".github/workflows/check.yml")
     workflow_files = sorted(
