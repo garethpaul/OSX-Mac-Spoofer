@@ -1,5 +1,12 @@
 # Changes
 
+## 2026-06-21
+
+- Made absolute Makefile verification safe for spaces and apostrophes,
+  ignored caller-provided `REPO_ROOT` values, and rejected command-line or
+  environment `MAKEFILE_LIST` injection before mocked safety gates run.
+- Added root-policy regressions for every public Make target.
+
 ## 2026-06-18
 
 - Bound privileged networking commands to fixed macOS system paths so a
