@@ -116,7 +116,8 @@ state, connectivity, and network policy afterward.
 
 The legacy `SpoofMACAddress` startup wrapper runs dry-run mode by default.
 Set `SPOOF_MAC_ADDRESS_APPLY=1` only when startup-time address changes are
-explicitly intended.
+explicitly intended. The wrapper always executes the adjacent checked-in
+`SpoofMACAddress.py`; callers cannot override the Python script path.
 
 ## Testing and Verification
 

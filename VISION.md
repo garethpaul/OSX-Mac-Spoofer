@@ -26,6 +26,7 @@ Priority:
 - Document supported macOS assumptions and required privileges
 - Prefer dry-run behavior before any network change
 - Avoid background or automatic network changes
+- Bind privileged startup to the adjacent checked-in Python implementation
 - Preserve the ability to pass an interface and address explicitly
 - Keep MAC address validation limited to nonzero, locally administered unicast
   values

@@ -2,7 +2,7 @@
 . /etc/rc.common
 
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-SCRIPT_PATH="${SPOOF_MAC_ADDRESS_SCRIPT:-$SCRIPT_DIR/SpoofMACAddress.py}"
+SCRIPT_PATH="$SCRIPT_DIR/SpoofMACAddress.py"
 
 StartService()
 {
