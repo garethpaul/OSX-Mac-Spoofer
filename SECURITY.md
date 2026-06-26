@@ -32,6 +32,8 @@ Helpful reports include:
 - The startup wrapper runs dry-run mode unless `SPOOF_MAC_ADDRESS_APPLY=1` is
   set. Do not add background or persistent address changes without prominent
   operator consent.
+- The startup wrapper must execute only its adjacent checked-in Python script;
+  environment variables must not redirect privileged startup to another path.
 - MAC address inputs should stay constrained to nonzero, locally administered
   unicast values before command construction.
 - Interface names that start with a dash should stay rejected so operator

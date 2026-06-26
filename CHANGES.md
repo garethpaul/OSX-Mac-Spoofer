@@ -1,5 +1,24 @@
 # Changes
 
+## 2026-06-26
+
+- **Timestamp:** 2026-06-26 13:15:15 PDT.
+- **Priority:** Privileged startup execution integrity.
+- **Summary:** Bind the legacy root startup wrapper to its adjacent checked-in
+  Python implementation and remove the arbitrary script-path environment
+  override while preserving explicit apply opt-in and dry-run defaults.
+- **Files:** `SpoofMACAddress`, `test_spoof_mac_address.py`,
+  `scripts/check-baseline.py`, `README.md`, `SECURITY.md`, `VISION.md`,
+  `CHANGES.md`, and `docs/plans/2026-06-26-startup-script-path-boundary.md`.
+- **Tests:** Added a focused wrapper-path regression; all 28 mocked unit tests,
+  four Makefile-root attacks, static checks, Python compilation, shell syntax,
+  and every Make alias pass locally and through an external absolute Makefile
+  path. Restoring the override makes the focused regression fail.
+- **Findings:** `SPOOF_MAC_ADDRESS_SCRIPT` allowed a privileged service
+  environment to select arbitrary Python code.
+- **Blockers:** None.
+- **Next action:** Verify the exact hosted Python 3.10/3.12 head before merge.
+
 ## 2026-06-21
 
 - Made absolute Makefile verification safe for spaces, apostrophes, quotes,

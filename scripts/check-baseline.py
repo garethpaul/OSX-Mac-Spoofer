@@ -27,6 +27,7 @@ POST_MUTATION_VERIFICATION_ERROR_PLAN = "docs/plans/2026-06-15-post-mutation-ver
 POST_MUTATION_MISMATCH_PLAN = "docs/plans/2026-06-15-post-mutation-mismatch-partial-state.md"
 COMMAND_LAUNCH_ERROR_PLAN = "docs/plans/2026-06-17-command-launch-error-boundary.md"
 SENSITIVE_OUTPUT_PLAN = "docs/plans/2026-06-18-sensitive-output-redaction.md"
+STARTUP_SCRIPT_PATH_PLAN = "docs/plans/2026-06-26-startup-script-path-boundary.md"
 REQUIRED = [
     ".github/workflows/check.yml",
     ".gitignore",
@@ -66,6 +67,7 @@ REQUIRED = [
     POST_MUTATION_MISMATCH_PLAN,
     COMMAND_LAUNCH_ERROR_PLAN,
     SENSITIVE_OUTPUT_PLAN,
+    STARTUP_SCRIPT_PATH_PLAN,
     "scripts/check-baseline.py",
     "scripts/test-makefile-root.py",
     "test_spoof_mac_address.py",
@@ -209,14 +211,17 @@ def main():
         "SPOOF_MAC_ADDRESS_APPLY",
         "--dry-run",
         "/usr/bin/env python3",
-        "SPOOF_MAC_ADDRESS_SCRIPT",
+        'SCRIPT_PATH="$SCRIPT_DIR/SpoofMACAddress.py"',
     ]:
         if phrase not in wrapper:
             failures.append(f"SpoofMACAddress wrapper must include {phrase}")
+    if "SPOOF_MAC_ADDRESS_SCRIPT" in wrapper:
+        failures.append("SpoofMACAddress wrapper must not allow a script path override")
 
     tests = read("test_spoof_mac_address.py")
     for phrase in [
         "test_normalize_mac_address",
+        "test_startup_wrapper_binds_the_checked_in_python_script",
         "test_normalize_observed_mac_address_accepts_hardware_addresses",
         "test_validate_interface_rejects_shell_metacharacters",
         "test_set_mac_address_dry_run_does_not_read_current_address",
@@ -903,6 +908,27 @@ def main():
         if evidence not in sensitive_output_verification:
             failures.append(
                 f"sensitive output redaction verification must record {evidence}"
+            )
+
+    startup_script_path_plan = read(STARTUP_SCRIPT_PATH_PLAN)
+    startup_status = re.findall(
+        r"(?mi)^status:\s*(.+?)\s*$", startup_script_path_plan
+    )
+    startup_verification = markdown_section(
+        startup_script_path_plan, "Verification Completed"
+    )
+    if startup_status != ["completed"] or "make check" not in startup_verification:
+        failures.append(
+            "startup script path boundary plan must record completed make check verification"
+        )
+    for evidence in [
+        "arbitrary Python path",
+        "test_startup_wrapper_binds_the_checked_in_python_script",
+        "SPOOF_MAC_ADDRESS_SCRIPT",
+    ]:
+        if evidence not in startup_script_path_plan:
+            failures.append(
+                f"startup script path boundary plan must preserve {evidence}"
             )
 
     guidance = " ".join(

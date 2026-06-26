@@ -16,6 +16,12 @@ SPEC.loader.exec_module(spoof)
 
 
 class SpoofMacAddressTest(unittest.TestCase):
+    def test_startup_wrapper_binds_the_checked_in_python_script(self):
+        wrapper = (ROOT / "SpoofMACAddress").read_text(encoding="utf-8")
+
+        self.assertIn('SCRIPT_PATH="$SCRIPT_DIR/SpoofMACAddress.py"', wrapper)
+        self.assertNotIn("SPOOF_MAC_ADDRESS_SCRIPT", wrapper)
+
     def test_normalize_mac_address_accepts_compact_and_colon_forms(self):
         self.assertEqual(
             "02:23:45:67:89:ab",
